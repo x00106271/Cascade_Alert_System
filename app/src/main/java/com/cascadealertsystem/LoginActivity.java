@@ -1,6 +1,4 @@
 package com.cascadealertsystem;
-// THIS FILE BELOW MUST BE ON THE JAVA FILE WHO RUNS THE LAUNCH ACTIVITY
-import com.microsoft.windowsazure.mobileservices.*;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,27 +12,17 @@ import android.widget.Toast;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import java.net.MalformedURLException;
 import java.util.List;
-import Model.User;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
+import Model.BaseUser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperations.*;
 
 
 public class LoginActivity extends Activity {
 
-    private MobileServiceTable<User> mTable;
-    String emailText, passwordText;
-    EditText email, password;
-    TextView registerScreen, forgotPassword;
-    Button loginButton;
+    private MobileServiceTable<BaseUser> mTable;
+    private String emailText, passwordText;
+    private EditText email, password;
+    private TextView registerScreen, forgotPassword;
+    private Button loginButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +43,9 @@ public class LoginActivity extends Activity {
                     "https://cascade.azure-mobile.net/",
                     "TVkGQDWdaeNNbNKirTHAknOUmHqWgu76",
                     this);
-            mTable = mClient.getTable("User",User.class);
+            mTable = mClient.getTable(BaseUser.class);
         } catch (MalformedURLException e) {
-            Toast.makeText(LoginActivity.this, "error loading mobile services", Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginActivity.this, "error loading cascade alert system", Toast.LENGTH_LONG).show();
         }
 
         // Listening to login button pressed
@@ -66,11 +54,16 @@ public class LoginActivity extends Activity {
             public void onClick(View v) {
                 emailText = email.getText().toString().trim();
                 passwordText = password.getText().toString().trim();
-                if (!emailText.equals("") || !passwordText.equals("")) {
-                    validateUser(emailText);
-                } else {
-                    Toast.makeText(LoginActivity.this, "Enter your email address and password",
+                if(emailText.equals("")) {
+                    Toast.makeText(LoginActivity.this, "enter an email address",
                             Toast.LENGTH_LONG).show();
+                }
+                else if(passwordText.equals("")){
+                    Toast.makeText(LoginActivity.this, "enter your password",
+                            Toast.LENGTH_LONG).show();
+                }
+                else {
+                    validateUser(emailText,passwordText);
                 }
             }
         });
@@ -82,6 +75,7 @@ public class LoginActivity extends Activity {
                 // Switching to Register screen
                 Intent regScreen = new Intent(getApplicationContext(), RegisterActivity.class);
                 startActivity(regScreen);
+                finish();
             }
         });
 
@@ -97,45 +91,37 @@ public class LoginActivity extends Activity {
     }
 
     // validate the user
-
-    public void validateUser(String email) {
-        /*new AsyncTask<String, Void, String>() {
+    public void validateUser(String email,String pass) {
+        new AsyncTask<String, Void, String>() {
             @Override
             protected String doInBackground(String... emails) {
                 String retPassword="";
                 String email = emails[0];
                 try {
-                    List<User> results =mTable.execute().get();
-                    for(User user:results){
-                        if(user.getEmail().equals(email)){
-                            retPassword=user.getPassword();
-                        }
+                    List<BaseUser> results =mTable.where().field("email").eq(email).execute().get();
+                    if(results==null){
+                        // do nothing
+                    }
+                    else{
+                        retPassword=results.get(0).getPassword();
                     }
                 } catch (Exception e) {
-                        retPassword=e.getMessage();
+
                 }
                 return retPassword;
             }
             protected void onPostExecute(String pass){
-                Toast.makeText(LoginActivity.this,pass,
-                        Toast.LENGTH_LONG).show();
                 if(pass.equals(passwordText)){
                     Intent mainScreen = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(mainScreen);
                     finish();
                 }
                 else{
-                    //Toast.makeText(LoginActivity.this, "password is incorrect!!",
-                            //Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, "password is incorrect!!",
+                    Toast.LENGTH_LONG).show();
                 }
-
             }
         }.execute(email);
-
     }
-}*/
-        Intent mainScreen = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(mainScreen);
-        finish();
-    }}
+}
 

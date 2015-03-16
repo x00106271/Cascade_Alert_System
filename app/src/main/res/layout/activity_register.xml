@@ -136,39 +136,16 @@
             android:weightSum="4"
             android:layout_below="@id/header2"
             android:id="@+id/header3">
-            <Spinner
+            <Button android:id="@+id/regBtnDOB"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/reg_day"
-                android:entries="@array/days"
-                android:prompt="@string/day"
-                android:hint="hint"
-                android:spinnerMode="dropdown"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:layout_weight="1"/>
-            <Spinner
-                android:layout_width="wrap_content"
+                android:layout_marginTop="10dip"
+                android:text="Click here to pick"/>
+            <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/reg_month"
-                android:entries="@array/months"
-                android:prompt="@string/month"
-                android:hint="hint"
-                android:spinnerMode="dropdown"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:layout_weight="1"/>
-            <Spinner
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/reg_year"
-                android:entries="@array/years"
-                android:prompt="@string/year"
-                android:hint="hint"
-                android:spinnerMode="dropdown"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:layout_weight="1"/>
+                android:textColor="#372c24"
+                android:text="DD/MM/YY"
+                android:id="@+id/regDOB"/>
         </LinearLayout>
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"

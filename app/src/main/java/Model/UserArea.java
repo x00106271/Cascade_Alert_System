@@ -12,7 +12,7 @@ public UserArea()
 
         }
 
-public UserArea(String itemId, User user, Area area, boolean userIsAdmin)
+public UserArea(String itemId, BaseUser user, Area area, boolean userIsAdmin)
         {
         // this.Id = itemId;
         // this.UserId = user.Id;
