@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -14,15 +13,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cascadealertsystem.R;
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import java.net.MalformedURLException;
 import java.util.Date;
-import models.BaseUser;
+import services.MobileService;
+import services.MobileServiceApp;
 
 public class RegisterActivity extends Activity {
 
-    private MobileServiceTable<BaseUser> mTable;
     private String firstNameText, lastNameText,emailText,passwordText,passwordConfirm,referText,phoneText,dobTextbox;
     private EditText firstname, lastname,email,password,passwordC,refer,phone;
     private TextView loginScreen,dob;
@@ -30,6 +26,9 @@ public class RegisterActivity extends Activity {
     private Date dobText;
     private int day,month,year;
     static final int DATE_PICKER_ID = 1111;
+    private MobileService mService;
+    private MobileServiceApp mApplication;
+    private final String TAG = "RegisterActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,16 +36,9 @@ public class RegisterActivity extends Activity {
         setContentView(R.layout.activity_register);
 
         // for mobile services
-        try {
-            // Create the Mobile Service Client instance, using the unique Mobile Service URL and key
-            MobileServiceClient mClient = new MobileServiceClient(
-                    "https://cascade.azure-mobile.net/",
-                    "TVkGQDWdaeNNbNKirTHAknOUmHqWgu76",
-                    this);
-            mTable = mClient.getTable(BaseUser.class);
-        } catch (MalformedURLException e) {
-            Toast.makeText(this, "error with cascade alert system", Toast.LENGTH_LONG).show();
-        }
+        mApplication = (MobileServiceApp) getApplication();
+        mApplication.setCurrentActivity(this);
+        mService = mApplication.getMobileService();
 
         loginScreen = (TextView) findViewById(R.id.link_to_login);
         dob=(TextView) findViewById(R.id.regDOB);
@@ -70,7 +62,8 @@ public class RegisterActivity extends Activity {
             public void onClick(View arg0) {
                 // Closing registration screen
                 // Switching to Login Screen/closing register screen
-                finish();
+                Intent loginScreen = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(loginScreen);
             }
         });
 
@@ -106,37 +99,7 @@ public class RegisterActivity extends Activity {
     // what happens when submit button pressed
     public void submit(){
         dobText=new Date((year-1900),month,day);
-        createUser();
-    }
-
-    // create a new user
-    public void createUser(){
-        final BaseUser user=new BaseUser(emailText,passwordText,false,firstNameText,lastNameText,dobText,0,phoneText,referText);
-        // Insert the new item
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... par) {
-                String done="";
-                try {
-                    mTable.insert(user).get();
-                    done="true";
-                } catch (Exception e) {
-                    done="false";
-                }
-                return done;
-            }
-            protected void onPostExecute(String done){
-                if(done.equals("true")){
-                    Toast.makeText(RegisterActivity.this, "User created", Toast.LENGTH_LONG).show();
-                    Intent mainScreen = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(mainScreen);
-                    finish();
-                }
-                else{
-                    Toast.makeText(RegisterActivity.this, "an error occured...try again!", Toast.LENGTH_LONG).show();
-                }
-            }
-        }.execute();
+        mService.createUser(emailText, passwordText, false, firstNameText, lastNameText, dobText, phoneText, referText);
     }
 
     // validate all user input is correct

@@ -2,7 +2,6 @@ package activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -11,20 +10,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cascadealertsystem.R;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import java.net.MalformedURLException;
-import java.util.List;
-import models.BaseUser;
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import services.MobileService;
+import services.MobileServiceApp;
 
 
 public class LoginActivity extends Activity {
 
-    private MobileServiceTable<BaseUser> mTable;
     private String emailText, passwordText;
     private EditText email, password;
     private TextView registerScreen, forgotPassword;
     private Button loginButton;
+    private MobileService mService;
+    private MobileServiceApp mApplication;
+    private final String TAG = "LoginActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,17 +36,9 @@ public class LoginActivity extends Activity {
         password = (EditText) findViewById(R.id.password_login);
 
         // for mobile services
-        try {
-            // Create the Mobile Service Client instance, using your unique Mobile Service URL and key
-            MobileServiceClient mClient = new MobileServiceClient(
-                    "https://cascade.azure-mobile.net/",
-                    "TVkGQDWdaeNNbNKirTHAknOUmHqWgu76",
-                    this);
-            // connect client to table
-            mTable = mClient.getTable(BaseUser.class);
-        } catch (MalformedURLException e) {
-            Toast.makeText(LoginActivity.this, "error loading cascade alert system", Toast.LENGTH_LONG).show();
-        }
+        mApplication = (MobileServiceApp) getApplication();
+        mApplication.setCurrentActivity(this);
+        mService = mApplication.getMobileService();
 
         // Listening to login button pressed
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -65,7 +55,7 @@ public class LoginActivity extends Activity {
                             Toast.LENGTH_LONG).show();
                 }
                 else {
-                    validateUser(emailText,passwordText);
+                    mService.validateUser(emailText,passwordText);
                 }
             }
         });
@@ -91,39 +81,4 @@ public class LoginActivity extends Activity {
             }
         });
     }
-
-    // validate the user
-    public void validateUser(String email,String pass) {
-        new AsyncTask<String, Void, String>() {
-            @Override
-            protected String doInBackground(String... emails) {
-                String retPassword="";
-                String email = emails[0];
-                try {
-                    List<BaseUser> results =mTable.where().field("email").eq(email).execute().get();
-                    if(results==null){
-                        // do nothing
-                    }
-                    else{
-                        retPassword=results.get(0).getPassword();
-                    }
-                } catch (Exception e) {
-
-                }
-                return retPassword;
-            }
-            protected void onPostExecute(String pass){
-                if(pass.equals(passwordText)){
-                    Intent mainScreen = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(mainScreen);
-                    finish();
-                }
-                else{
-                    Toast.makeText(LoginActivity.this, "password is incorrect!!",
-                    Toast.LENGTH_LONG).show();
-                }
-            }
-        }.execute(email);
-    }
 }
-
