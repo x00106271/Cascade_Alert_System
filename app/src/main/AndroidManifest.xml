@@ -39,7 +39,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name="activities.LoginActivity"
             android:label="@string/title_activity_login"
             android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
@@ -49,21 +49,21 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".RegisterActivity"
+            android:name="activities.RegisterActivity"
             android:label="@string/title_activity_register" >
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="activities.MainActivity"
             android:label="@string/app_name"
             android:uiOptions="splitActionBarWhenNarrow" >
         </activity>
         <activity
-            android:name=".DisplayCreateAlert"
+            android:name="activities.DisplayCreateAlert"
             android:label="@string/title_activity_display_create_alert"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName="activities.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.cascadealertsystem.MainActivity" />
+                android:value="activities.MainActivity" />
         </activity>
 
         <meta-data
@@ -71,11 +71,11 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name="activities.MapsActivity"
             android:label="@string/title_activity_maps" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.cascadealertsystem.MainActivity" />
+                android:value="activities.MainActivity" />
         </activity>
     </application>
 

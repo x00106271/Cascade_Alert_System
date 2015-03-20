@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    tools:context="com.cascadealertsystem.RegisterActivity"
+    tools:context="activities.RegisterActivity"
     android:fillViewport="true">
     <RelativeLayout
         android:layout_width="fill_parent"

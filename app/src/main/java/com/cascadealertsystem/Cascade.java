@@ -12,7 +12,7 @@ public class Cascade extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_opening_screen);
         // bring user to login screen
-        Intent loginScreen = new Intent(getApplicationContext(), LoginActivity.class);
+        Intent loginScreen = new Intent(getApplicationContext(), activities.LoginActivity.class);
         startActivity(loginScreen);
         finish();
     }
