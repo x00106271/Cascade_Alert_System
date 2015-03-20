@@ -11,10 +11,14 @@ import java.util.Date;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
 import java.net.MalformedURLException;
 import java.util.List;
 import activities.MainActivity;
+import models.Alert;
+import models.Area;
 import models.BaseUser;
 
 public class MobileService {
@@ -22,6 +26,8 @@ public class MobileService {
     //Mobile Services objects
     private MobileServiceClient mClient;
     private MobileServiceTable<BaseUser> mBaseUserTable;
+    private MobileServiceTable<Area> mAreaTable;
+    private MobileServiceTable<Alert> mAlertTable;
     private Context mContext;
     private final String TAG = "CAS mobile services. ";
 
@@ -32,6 +38,8 @@ public class MobileService {
                     Constants.MOBILE_SERVICE_APPLICATION_KEY, mContext);
 
             mBaseUserTable = mClient.getTable(BaseUser.class);
+            mAreaTable=mClient.getTable(Area.class);
+            mAlertTable=mClient.getTable(Alert.class);
 
         } catch (MalformedURLException e) {
             Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
@@ -111,5 +119,14 @@ public class MobileService {
         }.execute();
     }
 
+    // fill spinner in alert creation screen
+    public void getSpinnerList(TableQueryCallback<Area> callback) {
+        mAreaTable.where().execute(callback);
+    }
+
+    // create alert in alert creation screen
+    public void insertAlert(Alert alert, TableOperationCallback<Alert> callback) {
+        mAlertTable.insert(alert, callback);
+    }
 
 }

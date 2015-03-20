@@ -24,8 +24,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/alert_location_spinner"
-                android:entries="@array/alert_locations"
-                android:prompt="@string/chose_location"
                 android:spinnerMode="dialog"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"

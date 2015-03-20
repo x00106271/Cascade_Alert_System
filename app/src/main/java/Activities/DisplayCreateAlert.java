@@ -2,16 +2,28 @@ package activities;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.EditText;
-
 import com.cascadealertsystem.R;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import models.Alert;
+import models.Area;
+import services.MobileService;
+import services.MobileServiceApp;
 
 public class DisplayCreateAlert extends ActionBarActivity implements AdapterView.OnItemSelectedListener {
 
@@ -19,6 +31,10 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     private Spinner spinner1,spinner2;
     private EditText description,title;
     private Button image,video,date;
+    private MobileService mService;
+    private MobileServiceApp mApplication;
+    private final String TAG = "CreateAlertActivity";
+    private ArrayList<String> arealist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,9 +42,18 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         setContentView(R.layout.activity_display_create_alert);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
+        // for mobile services
+        mApplication = (MobileServiceApp) getApplication();
+        mApplication.setCurrentActivity(this);
+        mService = mApplication.getMobileService();
+
         // create spinners
         spinner1=(Spinner) findViewById(R.id.alert_type_spinner); // for the alert type
         spinner2=(Spinner) findViewById(R.id.alert_location_spinner); // for the alert location
+
+        // fill spinner dynamically from DB
+        arealist=new ArrayList<String>();
+        addToSpinner();
 
         // spinner listener
         spinner1.setOnItemSelectedListener(this);
@@ -93,8 +118,44 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
-    // method to post alert
-    public void postAlert(){
 
+    // spinner fill of areas
+    public void addToSpinner() {
+        mService.getSpinnerList(new TableQueryCallback<Area>() {
+
+            @Override
+            public void onCompleted(List<Area> results, int count,
+                                    Exception exception, ServiceFilterResponse response) {
+                if (exception == null) {
+
+                    for (Area item : results) {
+                        arealist.add(item.getLabel());
+                    }
+                    ArrayAdapter<String> adp = new ArrayAdapter<String>(DisplayCreateAlert.this,
+                            android.R.layout.simple_dropdown_item_1line, arealist);
+                    spinner2.setAdapter(adp);
+
+                } else {
+
+                }
+            }
+        });
+    }
+
+    //This does the alert insert to Mobile Services
+    public void addAlert(){
+        Alert newalert=new Alert();
+        mService.insertAlert(newalert, new TableOperationCallback<Alert>() {
+            @Override
+            public void onCompleted(Alert entity, Exception exception,
+                                    ServiceFilterResponse response) {
+
+                if (exception != null) {
+                    Log.e(TAG, exception.getMessage());
+                    return;
+                }
+
+            }
+        });
     }
 }
