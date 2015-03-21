@@ -63,12 +63,30 @@
                     android:layout_marginLeft="5dip"
                     android:layout_marginRight="5dip"
                     android:layout_marginBottom="20dip"/>
-        </LinearLayout>
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="3"
+            android:layout_marginBottom="20dip">
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dip"
+                android:layout_weight="2"
+                android:id="@+id/alertDate"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="change date"
+                android:layout_weight="1"
+                android:id="@+id/setDateBtn"/>
+        </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
             android:layout_below="@id/headercreate"
             android:id="@+id/headercreate2"
             android:layout_marginBottom="20dip">
@@ -84,19 +102,18 @@
                 android:text="Video"
                 android:layout_weight="1"
                 android:id="@+id/videoBtn"/>
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Date"
-                android:layout_weight="1"
-                android:id="@+id/dateBtn"/>
-            </LinearLayout>
+        </LinearLayout>
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/headercreate3"
             android:layout_below="@id/headercreate2"
             android:orientation="vertical">
+            <CheckBox
+                android:id="@+id/checkPriority"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Priority" />
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="Location"

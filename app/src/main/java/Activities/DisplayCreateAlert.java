@@ -1,5 +1,7 @@
 package activities;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,14 +12,20 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.EditText;
+import android.widget.TextView;
+
 import com.cascadealertsystem.R;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import models.Alert;
@@ -30,11 +38,17 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     private String type,location,descriptionText,titleText;
     private Spinner spinner1,spinner2;
     private EditText description,title;
-    private Button image,video,date;
+    private Button image,video,changedate;
     private MobileService mService;
     private MobileServiceApp mApplication;
     private final String TAG = "CreateAlertActivity";
     private ArrayList<String> arealist;
+    private CheckBox priority;
+    private int priorityOn=0;
+    private Date date;
+    private int day,month,year;
+    static final int DATE_DIALOG_ID=100;
+    private TextView textDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +80,7 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         // buttons
         image=(Button) findViewById(R.id.imageBtn);
         video=(Button) findViewById(R.id.videoBtn);
-        date=(Button) findViewById(R.id.dateBtn);
+        changedate=(Button) findViewById(R.id.setDateBtn);
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,10 +93,23 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
 
             }
         });
-        date.setOnClickListener(new View.OnClickListener() {
+        changedate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                showDialog(DATE_DIALOG_ID);
+            }
+        });
+        textDate=(TextView) findViewById(R.id.alertDate);
+        setCurrentDate();
 
+        // checkbox for priority
+        priority=(CheckBox) findViewById(R.id.checkPriority);
+        priority.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (((CheckBox) v).isChecked()) {
+                    priorityOn=1;
+                }
             }
         });
     }
@@ -145,6 +172,17 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     //This does the alert insert to Mobile Services
     public void addAlert(){
         Alert newalert=new Alert();
+        newalert.setAlertType(getAlertType());
+        newalert.setTitle(titleText);
+        newalert.setBody(descriptionText);
+        newalert.setComplete(true);
+        newalert.setActive(false);
+        newalert.setCreatedBy("keyth");
+        newalert.setBroadcast(isBroadcast());
+        newalert.setPriority(priorityOn);
+        newalert.setGpsId(null);
+        newalert.setStartDateTime(date);
+        newalert.setEndDateTime(null);
         mService.insertAlert(newalert, new TableOperationCallback<Alert>() {
             @Override
             public void onCompleted(Alert entity, Exception exception,
@@ -158,4 +196,85 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
             }
         });
     }
+
+    // convert alert type to an int
+    public int getAlertType(){
+        if(type.equals("crime")){
+            return 1;
+        }
+        else if(type.equals("missing")){
+            return 2;
+        }
+        else if(type.equals("traffic")){
+            return 3;
+        }
+        else if(type.equals("weather")){
+            return 4;
+        }
+        else if(type.equals("services")){
+            return 5;
+        }
+        else{ //event
+            return 6;
+        }
+    }
+
+    // find out is alert broadcast
+    public boolean isBroadcast(){
+        if(location.equals("All User Area")){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    //set current date and display
+    public void setCurrentDate(){
+        final Calendar calendar = Calendar.getInstance();
+        year = calendar.get(Calendar.YEAR);
+        month = calendar.get(Calendar.MONTH);
+        day = calendar.get(Calendar.DAY_OF_MONTH);
+        // set current date into textview
+        textDate.setText(new StringBuilder()
+                .append(day).append("-")
+                .append(month + 1).append("-")
+                .append(year).append(" "));
+        // set date object
+        date=new Date((year-1900),month,day);
+    }
+    // date dialog box
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case DATE_DIALOG_ID:
+
+                // open datepicker dialog.
+                // set date picker for current date
+                // add pickerListener listner to date picker
+                return new DatePickerDialog(this, pickerListener, year, month,day);
+        }
+        return null;
+    }
+
+    private DatePickerDialog.OnDateSetListener pickerListener = new DatePickerDialog.OnDateSetListener() {
+
+        // when dialog box is closed, below method will be called.
+        @Override
+        public void onDateSet(DatePicker view, int selectedYear,
+                              int selectedMonth, int selectedDay) {
+
+            year  = selectedYear;
+            month = selectedMonth;
+            day   = selectedDay;
+
+            // set new date into textview
+            textDate.setText(new StringBuilder()
+                    .append(day).append("-")
+                    .append(month + 1).append("-")
+                    .append(year).append(" "));
+            // set date object
+            date=new Date((year-1900),month,day);
+        }
+    };
 }
