@@ -1,6 +1,5 @@
 package activities;
 
-import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -12,20 +11,23 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.cascadealertsystem.R;
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
-import java.net.MalformedURLException;
 import java.util.List;
-
 import adaptors.AlertAdaptor;
 import models.Alert;
+import services.MobileService;
+import services.MobileServiceApp;
 
 public class MainActivity extends ActionBarActivity {
 
-    Button alert,message,maps;
+    private Button alert,message,maps;
     private AlertAdaptor mAdaptor;
-    private MobileServiceTable<Alert> mTable;
+    private final String TAG = "MainActivity";
+    private MobileService mService;
+    private MobileServiceApp mApplication;
+    private ListView alertList;
 
 
     @Override
@@ -36,22 +38,16 @@ public class MainActivity extends ActionBarActivity {
         alert=(Button) findViewById(R.id.alertBtn);
         message=(Button) findViewById(R.id.messageBtn);
         maps=(Button) findViewById(R.id.mapsBtn);
-        mAdaptor=new AlertAdaptor(this,R.layout.alert_row);
-        ListView alertList = (ListView) findViewById(R.id.listViewAlerts);
-        alertList.setAdapter(mAdaptor);
 
         // for mobile services
-        try {
-            // Create the Mobile Service Client instance, using the provided
-            // Mobile Service URL and key
-            MobileServiceClient mClient = new MobileServiceClient(
-                    "https://cascade.azure-mobile.net/",
-                    "TVkGQDWdaeNNbNKirTHAknOUmHqWgu76",
-                    this);
-            mTable = mClient.getTable("Alerts",Alert.class);
-        } catch (MalformedURLException e) {
-            Toast.makeText(MainActivity.this, "error loading mobile services", Toast.LENGTH_LONG).show();
-        }
+        mApplication = (MobileServiceApp) getApplication();
+        mApplication.setCurrentActivity(this);
+        mService = mApplication.getMobileService();
+
+        // adaptor for displaying alerts
+        mAdaptor=new AlertAdaptor(MainActivity.this);
+        alertList = (ListView) findViewById(R.id.listViewAlerts);
+        alertList.setAdapter(mAdaptor);
 
         // Load the items from the Mobile Service
         refreshItemsFromTable();
@@ -99,38 +95,32 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
 
+        if (id == R.id.menu_refresh) {
+            refreshItemsFromTable();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
+    // add alerts
     private void refreshItemsFromTable() {
+        mService.getAlerts(new TableQueryCallback<Alert>() {
 
-        // add alerts
-
-        new AsyncTask<Void, Void, Void>(){
             @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    final List<Alert> results =
-                            mTable.where().field("Active").
-                                    eq(true).execute().get();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAdaptor.clear();
-
-                            for(Alert item : results){
-                                mAdaptor.add(item);
-                            }
-                        }
-                    });
-                } catch (Exception e){
-
+            public void onCompleted(List<Alert> results, int count,
+                                    Exception exception, ServiceFilterResponse response) {
+                if (exception == null) {
+                    mAdaptor.clear();
+                    for (Alert item : results) {
+                        mAdaptor.add(item);
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "error loading alerts",
+                            Toast.LENGTH_LONG).show();
                 }
-
-                return null;
             }
-        }.execute();
-
+        });
     }
 
 }

@@ -12,14 +12,12 @@ import models.Alert;
 
 public class AlertAdaptor extends ArrayAdapter<Alert> {
 
-    Context mContext;
-    int MlayoutResourceId;
+    private Context mContext;
 
-    public AlertAdaptor(Context context, int layoutResourceId) {
-        super(context,layoutResourceId);
+    public AlertAdaptor(Context context) {
+        super(context,R.layout.alert_row);
 
         this.mContext = context;
-        this.MlayoutResourceId=layoutResourceId;
     }
 
     /**
@@ -32,12 +30,47 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
         if(rowView==null){
             LayoutInflater inflater = (LayoutInflater) mContext
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            rowView = inflater.inflate(MlayoutResourceId, parent, false);
+            rowView = inflater.inflate(R.layout.alert_row, parent, false);
         }
         rowView.setTag(current);
-        final TextView text=(TextView) rowView.findViewById(R.id.alertview);
-        text.setText(current.getBody());
+
+        final TextView type=(TextView) rowView.findViewById(R.id.alerttype);
+        final TextView date=(TextView) rowView.findViewById(R.id.alertdateshow);
+        final TextView title=(TextView) rowView.findViewById(R.id.alerttitle);
+        final TextView body=(TextView) rowView.findViewById(R.id.alertbody);
+        final TextView createdby=(TextView) rowView.findViewById(R.id.alertby);
+        final TextView comments=(TextView) rowView.findViewById(R.id.alertcomments);
+
+        title.setText(current.getTitle());
+        body.setText(current.getBody());
+        comments.setText("3 comments");
+        date.setText("11/11/11");
+        createdby.setText("keyth");
+        type.setText(getType(current.getAlertType()));
+
         return rowView;
+    }
+
+    // get type string from int value
+    public String getType(int id){
+        if(id==1){
+            return "crime";
+        }
+        else if(id==2){
+            return "missing";
+        }
+        else if(id==3){
+            return "traffic";
+        }
+        else if(id==4){
+            return "weather";
+        }
+        else if(id==5){
+            return "services";
+        }
+        else{ //event
+            return "event";
+        }
     }
 
 }

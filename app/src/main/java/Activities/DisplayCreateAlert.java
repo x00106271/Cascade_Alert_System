@@ -17,6 +17,7 @@ import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cascadealertsystem.R;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
@@ -38,7 +39,7 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     private String type,location,descriptionText,titleText;
     private Spinner spinner1,spinner2;
     private EditText description,title;
-    private Button image,video,changedate;
+    private Button image,video,changedate,post;
     private MobileService mService;
     private MobileServiceApp mApplication;
     private final String TAG = "CreateAlertActivity";
@@ -64,14 +65,12 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         // create spinners
         spinner1=(Spinner) findViewById(R.id.alert_type_spinner); // for the alert type
         spinner2=(Spinner) findViewById(R.id.alert_location_spinner); // for the alert location
+        // spinner listener
+        spinner1.setOnItemSelectedListener(this);
 
         // fill spinner dynamically from DB
         arealist=new ArrayList<String>();
         addToSpinner();
-
-        // spinner listener
-        spinner1.setOnItemSelectedListener(this);
-        spinner2.setOnItemSelectedListener(this);
 
         // text field for alert
         description=(EditText) findViewById(R.id.alertEditText);
@@ -81,6 +80,7 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         image=(Button) findViewById(R.id.imageBtn);
         video=(Button) findViewById(R.id.videoBtn);
         changedate=(Button) findViewById(R.id.setDateBtn);
+        post=(Button) findViewById(R.id.postBtn);
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,6 +101,20 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         });
         textDate=(TextView) findViewById(R.id.alertDate);
         setCurrentDate();
+        post.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                titleText=title.getText().toString().trim();
+                descriptionText=description.getText().toString().trim();
+                if(titleText.equals("")){
+                    Toast.makeText(DisplayCreateAlert.this, "alert must have a title",
+                            Toast.LENGTH_LONG).show();
+                }
+                else{
+                    addAlert();
+                }
+            }
+        });
 
         // checkbox for priority
         priority=(CheckBox) findViewById(R.id.checkPriority);
@@ -161,7 +175,7 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
                     ArrayAdapter<String> adp = new ArrayAdapter<String>(DisplayCreateAlert.this,
                             android.R.layout.simple_dropdown_item_1line, arealist);
                     spinner2.setAdapter(adp);
-
+                    spinner2.setOnItemSelectedListener(DisplayCreateAlert.this);
                 } else {
 
                 }
@@ -171,18 +185,7 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
 
     //This does the alert insert to Mobile Services
     public void addAlert(){
-        Alert newalert=new Alert();
-        newalert.setAlertType(getAlertType());
-        newalert.setTitle(titleText);
-        newalert.setBody(descriptionText);
-        newalert.setComplete(true);
-        newalert.setActive(false);
-        newalert.setCreatedBy("keyth");
-        newalert.setBroadcast(isBroadcast());
-        newalert.setPriority(priorityOn);
-        newalert.setGpsId(null);
-        newalert.setStartDateTime(date);
-        newalert.setEndDateTime(null);
+        Alert newalert=new Alert(getAlertType(),"keyth",titleText,descriptionText,date,date,isBroadcast(),priorityOn,null,false,true);
         mService.insertAlert(newalert, new TableOperationCallback<Alert>() {
             @Override
             public void onCompleted(Alert entity, Exception exception,
@@ -190,7 +193,13 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
 
                 if (exception != null) {
                     Log.e(TAG, exception.getMessage());
+                    Toast.makeText(DisplayCreateAlert.this, exception.getMessage(),
+                            Toast.LENGTH_LONG).show();
                     return;
+                }
+                else{
+                    Toast.makeText(DisplayCreateAlert.this, "alert created",
+                            Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -199,6 +208,7 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
 
     // convert alert type to an int
     public int getAlertType(){
+        type=spinner1.getSelectedItem().toString();
         if(type.equals("crime")){
             return 1;
         }
@@ -221,6 +231,7 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
 
     // find out is alert broadcast
     public boolean isBroadcast(){
+        location=spinner2.getSelectedItem().toString();
         if(location.equals("All User Area")){
             return true;
         }

@@ -72,6 +72,22 @@ public Alert(String itemId,int alerttype, String createdBy, String title, String
         MediaAssets = new ArrayList<MediaAsset>();
         }
 
+    public Alert(int alerttype, String createdBy, String title, String body,
+                 Date startDateTime, Date endDateTime,
+                 boolean broadcast, int priority,String gps, boolean active, boolean complete) {
+        this.alertType = alerttype;
+        this.createdBy = createdBy;
+        this.title = title;
+        this.body = body;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.broadcast = broadcast;
+        this.priority = priority;
+        this.active = active;
+        this.complete = complete;
+        this.gpsId = gps;
+    }
+
     public void setId(String id) {
         Id = id;
     }

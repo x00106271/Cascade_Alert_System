@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -13,7 +14,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cascadealertsystem.R;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
+
 import java.util.Date;
+
+import models.Alert;
+import models.BaseUser;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -99,8 +106,28 @@ public class RegisterActivity extends Activity {
     // what happens when submit button pressed
     public void submit(){
         dobText=new Date((year-1900),month,day);
-        mService.createUser(emailText, passwordText, false, firstNameText, lastNameText, dobText, phoneText, referText);
+        //mService.createUser(emailText, passwordText, false, firstNameText, lastNameText, dobText, phoneText, referText);
+        BaseUser newuser=new BaseUser(emailText, passwordText, false, firstNameText, lastNameText, dobText,0, phoneText, referText);
+        mService.createUser(newuser, new TableOperationCallback<BaseUser>() {
+            @Override
+            public void onCompleted(BaseUser entity, Exception exception,
+                                    ServiceFilterResponse response) {
+
+                if (exception != null) {
+                    Log.e(TAG, exception.getMessage());
+                    Toast.makeText(RegisterActivity.this, "an error occured...try again!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                else{
+                    Toast.makeText(RegisterActivity.this, "User created", Toast.LENGTH_LONG).show();
+                    Intent mainScreen = new Intent(RegisterActivity.this, MainActivity.class);
+                    startActivity(mainScreen);
+                }
+
+            }
+        });
     }
+
 
     // validate all user input is correct
     public boolean validate(){

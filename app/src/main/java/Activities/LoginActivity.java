@@ -10,6 +10,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cascadealertsystem.R;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+
+import java.util.List;
+
+import models.BaseUser;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -46,16 +52,31 @@ public class LoginActivity extends Activity {
             public void onClick(View v) {
                 emailText = email.getText().toString().trim();
                 passwordText = password.getText().toString().trim();
-                if(emailText.equals("")) {
+                if (emailText.equals("")) {
                     Toast.makeText(LoginActivity.this, "enter an email address",
                             Toast.LENGTH_LONG).show();
-                }
-                else if(passwordText.equals("")){
+                } else if (passwordText.equals("")) {
                     Toast.makeText(LoginActivity.this, "enter your password",
                             Toast.LENGTH_LONG).show();
-                }
-                else {
-                    mService.validateUser(emailText,passwordText);
+                } else {
+                    //mService.validateUser(emailText,passwordText);
+                    BaseUser user = new BaseUser(emailText, passwordText);
+                    mService.validateUser(user, new TableQueryCallback<BaseUser>() {
+
+                        @Override
+                        public void onCompleted(List<BaseUser> results, int count,
+                                                Exception exception, ServiceFilterResponse response) {
+                            if (exception == null) {
+                                if (count == 1) {
+                                    Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(mainScreen);
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "wrong login information!!try again...",
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }
+                    });
                 }
             }
         });

@@ -59,6 +59,22 @@ public class BaseUser {
         this.ReferralName = r;
     }
 
+    // constructor for log in
+    public BaseUser(String em,String pw){
+        this.email = em;
+        this.password = pw;
+        this.UserLevel = 0;
+        this.firstname = null;
+        this.lastname = null;
+        this.DOB = null;
+        this.AddressId = null;
+        this.Phone = null;
+        this.SmartPhoneUser = true;
+        this.supervisor = null;
+        this.verified = false;
+        this.ReferralName = null;
+    }
+
     // user level Standard = 0, Admin = 1, Garda = 2
     public BaseUser(String id, String email, String password, String supervisor, boolean verified, String firstName, String lastName, Date dob,
                     String phone, boolean smartPhoneUser, int userLevel, String addressId,
