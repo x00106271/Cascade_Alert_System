@@ -124,3 +124,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
 }
+/*mService.setAreaId(new TableQueryCallback<UserArea>(){
+                                    @Override
+                                    public void onCompleted(List<UserArea> result,int count,Exception e,ServiceFilterResponse response){
+                                        Toast.makeText(LoginActivity.this, "inside.. "+result.get(0).getAreaId(),
+                                                Toast.LENGTH_LONG).show();
+                                        mService.setAreaId(result.get(0).getAreaId());
+                                        mService.setAuthentication();
+                                    };
+                                                       });*/

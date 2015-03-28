@@ -59,7 +59,6 @@ public class LoginActivity extends Activity {
                     Toast.makeText(LoginActivity.this, "enter your password",
                             Toast.LENGTH_LONG).show();
                 } else {
-                    //mService.validateUser(emailText,passwordText);
                     BaseUser user = new BaseUser(emailText, passwordText);
                     mService.validateUser(user, new TableQueryCallback<BaseUser>() {
 
@@ -68,6 +67,8 @@ public class LoginActivity extends Activity {
                                                 Exception exception, ServiceFilterResponse response) {
                             if (exception == null) {
                                 if (count == 1) {
+                                    mService.setUserId(results.get(0).getId());
+                                    mService.setAuthentication();
                                     Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(mainScreen);
                                 } else {
