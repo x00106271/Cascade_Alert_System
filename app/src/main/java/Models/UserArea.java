@@ -3,11 +3,11 @@ package models;
 public class UserArea {
     @com.google.gson.annotations.SerializedName("Id")
     private String Id;
-    @com.google.gson.annotations.SerializedName("userid")
+    @com.google.gson.annotations.SerializedName("userId")
     public String userId;
-    @com.google.gson.annotations.SerializedName("areaid")
+    @com.google.gson.annotations.SerializedName("areaId")
     public String areaId;
-    @com.google.gson.annotations.SerializedName("userisadmin")
+    @com.google.gson.annotations.SerializedName("userIsAdmin")
     private boolean userIsAdmin;
 
 public UserArea()

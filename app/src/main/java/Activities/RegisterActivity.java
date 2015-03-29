@@ -13,13 +13,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cascadealertsystem.Pre_verify;
 import com.cascadealertsystem.R;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 
 import java.util.Date;
-
-import models.Alert;
 import models.BaseUser;
 import services.MobileService;
 import services.MobileServiceApp;
@@ -106,7 +105,6 @@ public class RegisterActivity extends Activity {
     // what happens when submit button pressed
     public void submit(){
         dobText=new Date((year-1900),month,day);
-        //mService.createUser(emailText, passwordText, false, firstNameText, lastNameText, dobText, phoneText, referText);
         BaseUser newuser=new BaseUser(emailText, passwordText, false, firstNameText, lastNameText, dobText,0, phoneText, referText);
         mService.createUser(newuser, new TableOperationCallback<BaseUser>() {
             @Override
@@ -120,7 +118,7 @@ public class RegisterActivity extends Activity {
                 }
                 else{
                     Toast.makeText(RegisterActivity.this, "User created", Toast.LENGTH_LONG).show();
-                    Intent mainScreen = new Intent(RegisterActivity.this, MainActivity.class);
+                    Intent mainScreen = new Intent(RegisterActivity.this, Pre_verify.class);
                     startActivity(mainScreen);
                 }
 

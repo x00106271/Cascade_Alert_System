@@ -31,4 +31,7 @@
 
     <string name="view_alert"></string>
     <string name="title_activity_opening_screen">opening_screen</string>
+    <string name="title_activity_pre_verify">Pre_verify</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>

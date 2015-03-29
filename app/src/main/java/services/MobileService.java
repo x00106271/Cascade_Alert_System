@@ -11,6 +11,7 @@ import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import java.net.MalformedURLException;
+import java.util.List;
 
 import activities.LoginActivity;
 import models.Alert;
@@ -29,7 +30,7 @@ public class MobileService {
     private Context mContext;
     private final String TAG = "CAS mobile services. ";
     private String mUserId;
-    private String mAreaId;
+    private List<UserArea> mAreaId;
     private String mEmail;
 
     public MobileService(Context context) {
@@ -72,7 +73,6 @@ public class MobileService {
             String area=settings.getString("areaid",null);
             if (user != null && !user.equals("")) {
                 mUserId=user;
-                mAreaId=area;
                 return true;
             }
             else{
@@ -111,16 +111,16 @@ public class MobileService {
 
     // set area id from DB
     public void setAreaId(TableQueryCallback<UserArea> callback){
-        mUserAreaTable.where().field("userid").eq(mUserId).execute(callback);
+        mUserAreaTable.where().field("userId").eq(mUserId).execute(callback);
     }
 
-    public void setAreaId(String area){
+    public void setAreaId(List<UserArea> area){
         mAreaId=area;
     }
     public String getUserId(){
         return mUserId;
     }
-    public String getAreaId(){
+    public List<UserArea> getAreaId(){
         return mAreaId;
     }
 

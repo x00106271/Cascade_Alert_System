@@ -27,7 +27,7 @@ public class Cascade extends Activity {
         mService = mApplication.getMobileService();
 
         // if authenticated go to main otherwise go to login
-        if(mService.isUserAuthenticated()){
+        /*if(mService.isUserAuthenticated()){
             Intent mainScreen = new Intent(Cascade.this, MainActivity.class);
             startActivity(mainScreen);
             finish();
@@ -36,7 +36,10 @@ public class Cascade extends Activity {
             Intent loginScreen = new Intent(Cascade.this, LoginActivity.class);
             startActivity(loginScreen);
             finish();
-        }
+        }*/
+        Intent loginScreen = new Intent(Cascade.this, LoginActivity.class);
+        startActivity(loginScreen);
+        finish();
 
     }
 

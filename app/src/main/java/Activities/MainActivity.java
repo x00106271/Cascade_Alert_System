@@ -17,6 +17,7 @@ import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import java.util.List;
 import adaptors.AlertAdaptor;
 import models.Alert;
+import models.UserArea;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -44,13 +45,15 @@ public class MainActivity extends ActionBarActivity {
         mApplication.setCurrentActivity(this);
         mService = mApplication.getMobileService();
 
+        // get area id of user
+        getAreaId();
+        /*Toast.makeText(MainActivity.this, mService.getAreaId(),
+                Toast.LENGTH_LONG).show();*/
+
         // adaptor for displaying alerts
         mAdaptor=new AlertAdaptor(MainActivity.this);
         alertList = (ListView) findViewById(R.id.listViewAlerts);
         alertList.setAdapter(mAdaptor);
-
-        // Load the items from the Mobile Service
-        refreshItemsFromTable();
 
         // Listening to alert button pressed
         alert.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +77,9 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(mapIntent);
             }
         });
+
+        // Load the items from the Mobile Service
+        refreshItemsFromTable();
     }
 
     @Override
@@ -123,13 +129,14 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+    // get area ids of user
+    public void getAreaId(){
+        mService.setAreaId(new TableQueryCallback<UserArea>(){
+            @Override
+            public void onCompleted(List<UserArea> result,int count,Exception e,ServiceFilterResponse response){
+                mService.setAreaId(result);
+            };
+        });
+    }
+
 }
-/*mService.setAreaId(new TableQueryCallback<UserArea>(){
-                                    @Override
-                                    public void onCompleted(List<UserArea> result,int count,Exception e,ServiceFilterResponse response){
-                                        Toast.makeText(LoginActivity.this, "inside.. "+result.get(0).getAreaId(),
-                                                Toast.LENGTH_LONG).show();
-                                        mService.setAreaId(result.get(0).getAreaId());
-                                        mService.setAuthentication();
-                                    };
-                                                       });*/

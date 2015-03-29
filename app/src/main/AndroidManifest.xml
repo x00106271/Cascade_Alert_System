@@ -18,17 +18,17 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="21" />
 
     <application
+        android:name="services.MobileServiceApp"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:name="services.MobileServiceApp">
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".Cascade"
             android:label="Cascade Alert System"
@@ -41,8 +41,8 @@
         </activity>
         <activity
             android:name="activities.LoginActivity"
-            android:noHistory="true"
             android:label="@string/title_activity_login"
+            android:noHistory="true"
             android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
 
@@ -53,7 +53,7 @@
         <activity
             android:name="activities.RegisterActivity"
             android:label="@string/title_activity_register"
-            android:noHistory="true">
+            android:noHistory="true" >
         </activity>
         <activity
             android:name="activities.MainActivity"
@@ -79,6 +79,10 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="activities.MainActivity" />
+        </activity>
+        <activity
+            android:name=".Pre_verify"
+            android:label="@string/title_activity_pre_verify" >
         </activity>
     </application>
 
