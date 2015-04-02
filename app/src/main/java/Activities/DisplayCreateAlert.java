@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
@@ -50,6 +51,8 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     private int day,month,year;
     static final int DATE_DIALOG_ID=100;
     private TextView textDate;
+    private AutoCompleteTextView autoCompleteTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +129,12 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
                 }
             }
         });
+/*
+        // autocomplete address
+        autoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.atoText);
+        autoCompleteTextView.setOnClickListener(this);
+        autoCompleteTextView.requestFocus();
+        autoCompleteTextView.setAdapter(new PlaceHolder(MainActivity.this,R.layout.list_item_autocomplete));*/
     }
 
 

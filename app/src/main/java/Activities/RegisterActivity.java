@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -15,26 +18,38 @@ import android.widget.Toast;
 
 import com.cascadealertsystem.Pre_verify;
 import com.cascadealertsystem.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 
 import java.util.Date;
+
+import adaptors.PlaceAdaptor;
 import models.BaseUser;
 import services.MobileService;
 import services.MobileServiceApp;
 
-public class RegisterActivity extends Activity {
+
+public class RegisterActivity extends Activity implements AdapterView.OnItemClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private String firstNameText, lastNameText,emailText,passwordText,passwordConfirm,referText,phoneText,dobTextbox;
     private EditText firstname, lastname,email,password,passwordC,refer,phone;
     private TextView loginScreen,dob;
-    private Button submitButton,dobButton;
+    private Button submitButton,dobButton,locateButton;
     private Date dobText;
     private int day,month,year;
     static final int DATE_PICKER_ID = 1111;
     private MobileService mService;
     private MobileServiceApp mApplication;
     private final String TAG = "RegisterActivity";
+    private AutoCompleteTextView autoCompleteTextView;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private String mLatitudeText;
+    private String mLongitudeText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +60,13 @@ public class RegisterActivity extends Activity {
         mApplication = (MobileServiceApp) getApplication();
         mApplication.setCurrentActivity(this);
         mService = mApplication.getMobileService();
+
+        //for google play services
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
 
         loginScreen = (TextView) findViewById(R.id.link_to_login);
         dob=(TextView) findViewById(R.id.regDOB);
@@ -57,6 +79,7 @@ public class RegisterActivity extends Activity {
         phone=(EditText) findViewById(R.id.reg_phone);
         submitButton=(Button) findViewById(R.id.regBtnSubmit);
         dobButton=(Button) findViewById(R.id.regBtnDOB);
+        locateButton=(Button) findViewById(R.id.regFind);
 
         year=1950;
         month=0;
@@ -100,7 +123,29 @@ public class RegisterActivity extends Activity {
                 showDialog(DATE_PICKER_ID);
             }
         });
+
+        // listen to locate button pressed
+        locateButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v) {
+                 mGoogleApiClient.connect();
+                Toast.makeText(RegisterActivity.this, mLatitudeText, Toast.LENGTH_LONG).show();
+                mGoogleApiClient.disconnect();
+            }
+        });
+
+        // autocomplete address
+        autoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.reg_address);
+        PlaceAdaptor pad = new PlaceAdaptor(RegisterActivity.this,R.layout.address_autocomplete);
+        autoCompleteTextView.setAdapter(pad);
+        autoCompleteTextView.setOnItemClickListener(this);
+
     }
+
+    // click listener for the auto complete
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+        String str = (String) adapterView.getItemAtPosition(position);
+        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+    };
 
     // what happens when submit button pressed
     public void submit(){
@@ -198,4 +243,30 @@ public class RegisterActivity extends Activity {
 
         }
     };
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            mLatitudeText=String.valueOf(mLastLocation.getLatitude());
+            mLongitudeText=String.valueOf(mLastLocation.getLongitude());
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection has been interrupted.
+        // Disable any UI components that depend on Google APIs
+        // until onConnected() is called.
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // This callback is important for handling errors that
+        // may occur while attempting to connect with Google.
+        //
+        // More about this in the next section.
+        Toast.makeText(RegisterActivity.this, "error failed", Toast.LENGTH_LONG).show();
+    }
 }

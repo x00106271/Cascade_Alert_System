@@ -8,8 +8,7 @@
     android:fillViewport="true">
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffffff">
+        android:layout_height="wrap_content">
 
         <!--  Header Starts-->
         <LinearLayout
@@ -28,14 +27,6 @@
         </LinearLayout>
         <!--  Header Ends -->
 
-        <!-- Footer Start -->
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
-        </LinearLayout>
-        <!-- Place footer next to header to set z-index property to minus value -->
-        <!-- Footer Ends -->
-
         <!-- Login Form -->
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -49,7 +40,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="First Name"/>
+                android:text="First Name"
+                android:textStyle="bold"/>
             <EditText android:id="@+id/reg_firstname"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -59,7 +51,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Last Name"/>
+                android:text="Last Name"
+                android:textStyle="bold"/>
             <EditText android:id="@+id/reg_lastname"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -70,7 +63,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Email"/>
+                android:text="Email"
+                android:textStyle="bold"/>
             <EditText android:id="@+id/reg_email"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -82,7 +76,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Phone"/>
+                android:text="Phone"
+                android:textStyle="bold"/>
             <EditText android:id="@+id/reg_phone"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -93,7 +88,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Password"/>
+                android:text="Password"
+                android:textStyle="bold"/>
             <EditText android:id="@+id/reg_password"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -104,7 +100,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Confirm Password"/>
+                android:text="Confirm Password"
+                android:textStyle="bold"/>
             <EditText android:id="@+id/reg_password_confirm"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -115,7 +112,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Person who referred you"/>
+                android:text="Person who referred you"
+                android:textStyle="bold"/>
             <EditText android:id="@+id/reg_refer"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -125,7 +123,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Date of Birth"/>
+                android:text="Date of Birth"
+                android:textStyle="bold"/>
         </LinearLayout>
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -142,7 +141,8 @@
                 android:layout_marginTop="10dip"
                 android:text="Click here to pick"/>
             <TextView android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
+                android:gravity="center_horizontal"
                 android:textColor="#372c24"
                 android:text="DD/MM/YY"
                 android:id="@+id/regDOB"/>
@@ -158,7 +158,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Address"/>
+                android:text="Address"
+                android:textStyle="bold"/>
         </LinearLayout>
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -168,21 +169,28 @@
             android:padding="10dip"
             android:layout_below="@id/header4"
             android:id="@+id/header5">
-            <Button android:id="@+id/regFind"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dip"
-                android:text="Find"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"/>
-            <EditText android:id="@+id/reg_address"
+            <AutoCompleteTextView android:id="@+id/reg_address"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dip"
                 android:singleLine="true"
-                android:layout_toStartOf="@id/regFind"
-                android:layout_toLeftOf="@id/regFind"/>
+                android:hint="Enter Address here"
+                android:gravity="center"/>
+            <TextView android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:textColor="#372c24"
+                android:text="OR"
+                android:textStyle="bold"
+                android:layout_marginTop="5dip"
+                android:layout_below="@id/reg_address"
+                android:id="@+id/reg_textOR"
+                android:gravity="center_horizontal"/>
+            <Button android:id="@+id/regFind"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dip"
+                android:text="take address from current location"
+                android:layout_below="@id/reg_textOR"/>
         </RelativeLayout>
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -191,18 +199,7 @@
             android:layout_height="match_parent"
             android:layout_below="@id/header5"
             android:id="@+id/header6">
-            <EditText android:id="@+id/reg_addressList"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:inputType="textMultiLine"
-                android:layout_marginBottom="20dip"/>
-            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-                android:name="com.google.android.gms.maps.MapFragment"
-                android:id="@+id/reg_map"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_below="@id/reg_addressList"
-                android:layout_marginBottom="20dip"/>
+
         </RelativeLayout>
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
