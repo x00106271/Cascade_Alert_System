@@ -42,12 +42,13 @@ public class Cascade extends Activity {
             startActivity(loginScreen);
             finish();
         }*/
+
+        // check device has google play services...if not give user update/download choice
+        checkPlayServices();
+
         Intent loginScreen = new Intent(Cascade.this, LoginActivity.class);
         startActivity(loginScreen);
         finish();
-
-        // check device has google play services
-        checkPlayServices();
 
     }
 

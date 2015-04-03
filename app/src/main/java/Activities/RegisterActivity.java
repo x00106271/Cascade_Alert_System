@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Intent;
+import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,7 +18,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.cascadealertsystem.Pre_verify;
 import com.cascadealertsystem.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -23,11 +25,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
-
 import java.util.Date;
-
 import adaptors.PlaceAdaptor;
 import models.BaseUser;
+import services.Constants;
+import services.FetchAddressIntentService;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -47,8 +49,7 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
     private AutoCompleteTextView autoCompleteTextView;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private String mLatitudeText;
-    private String mLongitudeText;
+    private AddressResultReceiver mResultReceiver;
 
 
     @Override
@@ -67,6 +68,10 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
+        mGoogleApiClient.connect();
+
+        // for reciever
+        mResultReceiver=new AddressResultReceiver(new Handler());
 
         loginScreen = (TextView) findViewById(R.id.link_to_login);
         dob=(TextView) findViewById(R.id.regDOB);
@@ -127,9 +132,15 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         // listen to locate button pressed
         locateButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v) {
-                 mGoogleApiClient.connect();
-                Toast.makeText(RegisterActivity.this, mLatitudeText, Toast.LENGTH_LONG).show();
-                mGoogleApiClient.disconnect();
+                if (mGoogleApiClient.isConnected() && mLastLocation != null){
+                    Intent intent = new Intent(RegisterActivity.this, FetchAddressIntentService.class);
+                    intent.putExtra("receiver", mResultReceiver);
+                    startService(intent);
+                }
+                else{
+                    Toast.makeText(RegisterActivity.this, "sorry GPS is unavailable", Toast.LENGTH_SHORT).show();
+                }
+                //mGoogleApiClient.disconnect();
             }
         });
 
@@ -170,7 +181,6 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
             }
         });
     }
-
 
     // validate all user input is correct
     public boolean validate(){
@@ -216,10 +226,6 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
     protected Dialog onCreateDialog(int id) {
         switch (id) {
             case DATE_PICKER_ID:
-
-                // open datepicker dialog.
-                // set date picker for current date
-                // add pickerListener listner to date picker
                 return new DatePickerDialog(this, pickerListener, year, month,day);
         }
         return null;
@@ -240,7 +246,6 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
             dob.setText(new StringBuilder().append(day)
                     .append("-").append(month + 1).append("-").append(year)
                     .append(" "));
-
         }
     };
 
@@ -249,16 +254,13 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if (mLastLocation != null) {
-            mLatitudeText=String.valueOf(mLastLocation.getLatitude());
-            mLongitudeText=String.valueOf(mLastLocation.getLongitude());
+            Constants.LOCATION=mLastLocation;
         }
     }
 
     @Override
     public void onConnectionSuspended(int cause) {
-        // The connection has been interrupted.
-        // Disable any UI components that depend on Google APIs
-        // until onConnected() is called.
+
     }
 
     @Override
@@ -268,5 +270,35 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         //
         // More about this in the next section.
         Toast.makeText(RegisterActivity.this, "error failed", Toast.LENGTH_LONG).show();
+    }
+
+    // address receiver from service
+    class AddressResultReceiver extends ResultReceiver {
+
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+
+            if (resultCode == Constants.SUCCESS_RESULT) {
+                //ArrayList<String> returned= resultData.getStringArrayList("returning");
+                Address add;
+                String add2;
+                for(int i=0;i<5;i++){
+                    add2="";
+                    add=Constants.ADDRESSLIST.get(i);
+                    for (int j = 0; j < add.getMaxAddressLineIndex(); j++) {
+                        add2=add2+add.getAddressLine(j)+", ";
+                    }
+                    Toast.makeText(RegisterActivity.this, add2, Toast.LENGTH_LONG).show();
+                }
+            }
+            else{
+                Toast.makeText(RegisterActivity.this, "error code returned", Toast.LENGTH_LONG).show();
+            }
+
+        }
     }
 }

@@ -84,6 +84,9 @@
             android:name=".Pre_verify"
             android:label="@string/title_activity_pre_verify" >
         </activity>
+        <service
+            android:name="services.FetchAddressIntentService"
+            android:exported="false"/>
     </application>
 
 </manifest>
