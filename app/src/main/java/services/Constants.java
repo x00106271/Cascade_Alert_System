@@ -15,6 +15,9 @@ public final class Constants {
     //for geocoder
     public static final int SUCCESS_RESULT = 0;
     public static final int FAILURE_RESULT = 1;
+    public static final int SUCCESS_RESULT_GPS = 2;
+    public static final int FAILURE_RESULT_GPS = 3;
     public static Location LOCATION=null;
     public static List<Address> ADDRESSLIST=null;
+    public static Address ADDRESS_GPS=null;
 }

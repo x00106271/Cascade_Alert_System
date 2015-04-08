@@ -44,14 +44,14 @@ public class BaseUser {
 
     }
     // constructor for register user
-    public BaseUser(String e,String p,boolean v,String f,String l,Date d,int u,String ph,String r){
+    public BaseUser(String e,String p,boolean v,String f,String l,Date d,int u,String ph,String r,String ad){
         this.email = e;
         this.password = p;
         this.UserLevel = u;
         this.firstname = f;
         this.lastname = l;
         this.DOB = d;
-        this.AddressId = null;
+        this.AddressId = ad;
         this.Phone = ph;
         this.SmartPhoneUser = true;
         this.supervisor = null;

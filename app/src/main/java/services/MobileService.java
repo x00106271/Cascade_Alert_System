@@ -17,6 +17,7 @@ import activities.LoginActivity;
 import models.Alert;
 import models.Area;
 import models.BaseUser;
+import models.GPS;
 import models.UserArea;
 
 public class MobileService {
@@ -27,6 +28,7 @@ public class MobileService {
     private MobileServiceTable<Area> mAreaTable;
     private MobileServiceTable<Alert> mAlertTable;
     private MobileServiceTable<UserArea> mUserAreaTable;
+    private MobileServiceTable<GPS> mGPSTable;
     private Context mContext;
     private final String TAG = "CAS mobile services. ";
     private String mUserId;
@@ -43,6 +45,7 @@ public class MobileService {
             mAreaTable=mClient.getTable(Area.class);
             mAlertTable=mClient.getTable(Alert.class);
             mUserAreaTable=mClient.getTable(UserArea.class);
+            mGPSTable=mClient.getTable(GPS.class);
 
         } catch (MalformedURLException e) {
             Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
@@ -144,6 +147,11 @@ public class MobileService {
     //fill main screen with alerts
     public void getAlerts(TableQueryCallback<Alert> callback) {
         mAlertTable.where().execute(callback);
+    }
+
+    // create gps in DB
+    public void insertGPS(GPS gps, TableOperationCallback<GPS> callback) {
+        mGPSTable.insert(gps, callback);
     }
 
 }

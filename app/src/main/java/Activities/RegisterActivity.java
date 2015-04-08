@@ -1,8 +1,10 @@
 package activities;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Location;
@@ -28,8 +30,10 @@ import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import java.util.Date;
 import adaptors.PlaceAdaptor;
 import models.BaseUser;
+import models.GPS;
 import services.Constants;
 import services.FetchAddressIntentService;
+import services.FetchCordinatesIntentService;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -50,6 +54,8 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private AddressResultReceiver mResultReceiver;
+    private AddressResultReceiver mResultReceiverGPS;
+    private String gps_id;
 
 
     @Override
@@ -72,6 +78,7 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
 
         // for reciever
         mResultReceiver=new AddressResultReceiver(new Handler());
+        mResultReceiverGPS=new AddressResultReceiver(new Handler());
 
         loginScreen = (TextView) findViewById(R.id.link_to_login);
         dob=(TextView) findViewById(R.id.regDOB);
@@ -85,7 +92,7 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         submitButton=(Button) findViewById(R.id.regBtnSubmit);
         dobButton=(Button) findViewById(R.id.regBtnDOB);
         locateButton=(Button) findViewById(R.id.regFind);
-
+        gps_id=null;
         year=1950;
         month=0;
         day=1;
@@ -94,9 +101,9 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         loginScreen.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View arg0) {
-                // Closing registration screen
                 // Switching to Login Screen/closing register screen
-                Intent loginScreen = new Intent(getApplicationContext(), MainActivity.class);
+                Intent loginScreen = new Intent(getApplicationContext(), LoginActivity.class);
+                mGoogleApiClient.disconnect();
                 startActivity(loginScreen);
             }
         });
@@ -105,19 +112,22 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         submitButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-        firstNameText=firstname.getText().toString().trim();
-        lastNameText=lastname.getText().toString().trim();
-        emailText=email.getText().toString().trim();
-        passwordText=password.getText().toString().trim();
-        passwordConfirm=passwordC.getText().toString().trim();
-        phoneText=phone.getText().toString().trim();
-        referText=refer.getText().toString().trim();
-        dobTextbox=dob.getText().toString().trim();
-        boolean proceed=validate();
-        if(proceed){
-            submit();
-        }
-            }
+                submitButton.setEnabled(false);
+                firstNameText = firstname.getText().toString().trim();
+                lastNameText = lastname.getText().toString().trim();
+                emailText = email.getText().toString().trim();
+                passwordText = password.getText().toString().trim();
+                passwordConfirm = passwordC.getText().toString().trim();
+                phoneText = phone.getText().toString().trim();
+                referText = refer.getText().toString().trim();
+                dobTextbox = dob.getText().toString().trim();
+                boolean proceed = validate(); // validate all user input
+                if (proceed) {
+                    getGPS(autoCompleteTextView.getText().toString()); // checks if address is correct and returns a gps co-ordinate
+                    } else {
+                        submitButton.setEnabled(true);
+                    }
+                }
         });
 
         // Listening to date picker button pressed
@@ -140,7 +150,6 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
                 else{
                     Toast.makeText(RegisterActivity.this, "sorry GPS is unavailable", Toast.LENGTH_SHORT).show();
                 }
-                //mGoogleApiClient.disconnect();
             }
         });
 
@@ -156,12 +165,13 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         String str = (String) adapterView.getItemAtPosition(position);
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
-    };
+    }
 
     // what happens when submit button pressed
     public void submit(){
         dobText=new Date((year-1900),month,day);
-        BaseUser newuser=new BaseUser(emailText, passwordText, false, firstNameText, lastNameText, dobText,0, phoneText, referText);
+        //create user and put in DB
+        BaseUser newuser=new BaseUser(emailText, passwordText, false, firstNameText, lastNameText, dobText,0, phoneText, referText,gps_id);
         mService.createUser(newuser, new TableOperationCallback<BaseUser>() {
             @Override
             public void onCompleted(BaseUser entity, Exception exception,
@@ -169,12 +179,12 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
 
                 if (exception != null) {
                     Log.e(TAG, exception.getMessage());
-                    Toast.makeText(RegisterActivity.this, "an error occured...try again!", Toast.LENGTH_LONG).show();
-                    return;
+                    Toast.makeText(RegisterActivity.this, "an error occurred...please try again!", Toast.LENGTH_LONG).show();
+                    submitButton.setEnabled(true);
                 }
                 else{
-                    Toast.makeText(RegisterActivity.this, "User created", Toast.LENGTH_LONG).show();
                     Intent mainScreen = new Intent(RegisterActivity.this, Pre_verify.class);
+                    mGoogleApiClient.disconnect();
                     startActivity(mainScreen);
                 }
 
@@ -192,8 +202,8 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
             Toast.makeText(this, "you must enter a last name", Toast.LENGTH_LONG).show();
             return false;
         }
-        else if(emailText.equals("")){ // NEED TO VALIDATE EMAIL
-            Toast.makeText(this, "you must enter a correct email address", Toast.LENGTH_LONG).show();
+        else if(emailText.equals("")){
+            Toast.makeText(this, "you must enter an email address", Toast.LENGTH_LONG).show();
             return false;
         }
         else if(passwordText.equals("")){
@@ -216,8 +226,28 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
             Toast.makeText(this, "please supply a phone number", Toast.LENGTH_LONG).show();
             return false;
         }
+        else if(!emailText.equals("")){
+            if(validateEmail(emailText)){
+                return true;
+            }
+            else{
+                Toast.makeText(this, "you entered an invalid email address", Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+        }
         else{
             return true;
+        }
+    }
+
+    // validate email address
+    public boolean validateEmail(String email){
+        if(email.matches("[a-z0-9!#$%&'*+/=?^_{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-z0-9](?:‌​[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")){
+            return true;
+        }
+        else{
+            return false;
         }
     }
 
@@ -269,7 +299,7 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         // may occur while attempting to connect with Google.
         //
         // More about this in the next section.
-        Toast.makeText(RegisterActivity.this, "error failed", Toast.LENGTH_LONG).show();
+        Toast.makeText(RegisterActivity.this, "error google connection failed", Toast.LENGTH_LONG).show();
     }
 
     // address receiver from service
@@ -281,24 +311,84 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
 
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
-
             if (resultCode == Constants.SUCCESS_RESULT) {
-                //ArrayList<String> returned= resultData.getStringArrayList("returning");
                 Address add;
                 String add2;
-                for(int i=0;i<5;i++){
+                String[] add3=new String[3];
+                for(int i=0;i<3;i++){
                     add2="";
                     add=Constants.ADDRESSLIST.get(i);
                     for (int j = 0; j < add.getMaxAddressLineIndex(); j++) {
                         add2=add2+add.getAddressLine(j)+", ";
                     }
-                    Toast.makeText(RegisterActivity.this, add2, Toast.LENGTH_LONG).show();
+                    add2=add2.substring(0, add2.length() - 2);
+                    add3[i]=add2;
                 }
+                AlertDialog.Builder addDialog = new AlertDialog.Builder(RegisterActivity.this);
+                addDialog.setTitle("pick an address");
+                final String[] add4=add3;
+                addDialog.setItems(add4, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int item) {
+                        autoCompleteTextView.setText(add4[item]);
+                    }
+                });
+                addDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.dismiss();
+                    }
+                });
+                final AlertDialog alert = addDialog.create();
+                alert.show();
+            }
+            else if(resultCode == Constants.FAILURE_RESULT){
+                Toast.makeText(RegisterActivity.this, "GPS is unavailable", Toast.LENGTH_LONG).show();
+            }
+            else if(resultCode == Constants.SUCCESS_RESULT_GPS){
+                Toast.makeText(RegisterActivity.this, "creating user...", Toast.LENGTH_SHORT).show();
+                insertGPS();
             }
             else{
-                Toast.makeText(RegisterActivity.this, "error code returned", Toast.LENGTH_LONG).show();
+                Toast.makeText(RegisterActivity.this, "sorry the address was not found", Toast.LENGTH_LONG).show();
+                submitButton.setEnabled(true);
             }
 
         }
+    }
+
+    // get gps from address
+    public void getGPS(String address){
+        if (mGoogleApiClient.isConnected()){
+            Intent intent = new Intent(RegisterActivity.this, FetchCordinatesIntentService.class);
+            intent.putExtra("receiver", mResultReceiverGPS);
+            intent.putExtra("address",address);
+            startService(intent);
+        }
+        else{
+            Toast.makeText(RegisterActivity.this, "sorry your GPS services are unavailable and required to use this application", Toast.LENGTH_SHORT).show();
+            submitButton.setEnabled(true);
+        }
+    }
+
+    // insert gps in DB
+    public void insertGPS(){
+        GPS gps=new GPS(autoCompleteTextView.getText().toString(),Constants.ADDRESS_GPS.getLatitude(),Constants.ADDRESS_GPS.getLongitude(),
+                0,false,autoCompleteTextView.getText().toString(),0);
+        mService.insertGPS(gps, new TableOperationCallback<GPS>() {
+            @Override
+            public void onCompleted(GPS entity, Exception exception,
+                                    ServiceFilterResponse response) {
+
+                if (exception != null) {
+                    Log.e(TAG, exception.getMessage());
+                    submitButton.setEnabled(true);
+                    Toast.makeText(RegisterActivity.this, "an error occurred...please try again!", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    gps_id=entity.getId();
+                    submit();
+                }
+
+            }
+        });
     }
 }
