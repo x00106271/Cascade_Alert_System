@@ -64,8 +64,9 @@ public class MobileService {
     // validate a user on login screen
     public void validateUser(BaseUser user,TableQueryCallback<BaseUser> callback) {
         mEmail=user.getEmail();
-        mBaseUserTable.where().field("email").eq(user.getEmail()).and().field("verified").eq(true).and().field("password")
+        mBaseUserTable.where().field("email").eq(user.getEmail()).and().field("password")
         .eq(user.getPassword()).execute(callback);
+        // .and().field("verified").eq(true)
     }
 
     // check if user details stored on device
@@ -152,6 +153,11 @@ public class MobileService {
     // create gps in DB
     public void insertGPS(GPS gps, TableOperationCallback<GPS> callback) {
         mGPSTable.insert(gps, callback);
+    }
+
+    // check email unique in register screen
+    public void checkEmail(String email,TableQueryCallback<BaseUser> callback) {
+        mBaseUserTable.where().field("email").eq(email).execute(callback);
     }
 
 }

@@ -135,11 +135,14 @@
             android:weightSum="4"
             android:layout_below="@id/header2"
             android:id="@+id/header3">
-            <Button android:id="@+id/regBtnDOB"
+            <TextView android:id="@+id/regBtnDOB"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dip"
-                android:text="Click here to pick"/>
+                android:text="Click Here To Pick A Date"
+                android:onClick="onClick"
+                android:clickable="true"
+                android:textColor="#0b84aa"/>
             <TextView android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:gravity="center_horizontal"
@@ -185,12 +188,16 @@
                 android:layout_below="@id/reg_address"
                 android:id="@+id/reg_textOR"
                 android:gravity="center_horizontal"/>
-            <Button android:id="@+id/regFind"
+            <TextView android:id="@+id/regFind"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dip"
-                android:text="take address from current location"
-                android:layout_below="@id/reg_textOR"/>
+                android:text="Take Address From Current Location"
+                android:layout_below="@id/reg_textOR"
+                android:onClick="onClick"
+                android:clickable="true"
+                android:textColor="#0b84aa"
+                android:gravity="center"/>
         </RelativeLayout>
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"

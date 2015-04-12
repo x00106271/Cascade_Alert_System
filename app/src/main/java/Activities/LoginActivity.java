@@ -67,10 +67,17 @@ public class LoginActivity extends Activity {
                                                 Exception exception, ServiceFilterResponse response) {
                             if (exception == null) {
                                 if (count == 1) {
-                                    mService.setUserId(results.get(0).getId());
-                                    mService.setAuthentication();
-                                    Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
-                                    startActivity(mainScreen);
+                                    if(results.get(0).isVerified()){
+                                        mService.setUserId(results.get(0).getId());
+                                        mService.setAuthentication();
+                                        Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
+                                        startActivity(mainScreen);
+                                        finish();
+                                    }
+                                    else{
+                                        Toast.makeText(LoginActivity.this, "sorry you have not yet been verified by the administrator!",
+                                                Toast.LENGTH_LONG).show();
+                                    }
                                 } else {
                                     Toast.makeText(LoginActivity.this, "wrong login information!!try again...",
                                             Toast.LENGTH_LONG).show();

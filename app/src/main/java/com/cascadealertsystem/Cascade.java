@@ -7,15 +7,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -35,6 +39,8 @@ public class Cascade extends Activity {
     private final String TAG = "OpeningActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private WifiManager wifiManager;
+    // Splash screen timer
+    private static int SPLASH_TIME_OUT = 2000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,35 +56,47 @@ public class Cascade extends Activity {
         ImageView iv_background = (ImageView) findViewById(R.id.iv_background);
         BitmapWorkerTask task = new BitmapWorkerTask(iv_background);
         task.execute(R.drawable.splashscreenlogo);
+        turnOnWIFI(); // turn on wifi if is off
+    }
 
-        if(checkPlayServices()){
+    // method that starts once background image has been loaded
+    public void begin(){
+        if(checkPlayServices()){ // check play services on device
+            if(isNetworkOnline()) { // check network active on device
+                if (gpsSettingsMenu()) { // check gps active on device
 
-            // for mobile services
-            mApplication = (MobileServiceApp) getApplication();
-            mApplication.setCurrentActivity(this);
-            mService = mApplication.getMobileService();
+                    // for mobile services
+                    mApplication = (MobileServiceApp) getApplication();
+                    mApplication.setCurrentActivity(this);
+                    mService = mApplication.getMobileService();
 
-            // if authenticated go to main otherwise go to login
-        /*if(mService.isUserAuthenticated()){
-            Intent mainScreen = new Intent(Cascade.this, MainActivity.class);
-            startActivity(mainScreen);
-            finish();
+                    new Handler().postDelayed(new Runnable() { // timer
+                        @Override
+                        public void run() {
+                            // if already authenticated go to main otherwise go to login
+                            if (mService.isUserAuthenticated()) {
+                                Intent mainScreen = new Intent(Cascade.this, MainActivity.class);
+                                startActivity(mainScreen);
+                                finish();
+                            } else {
+                                Intent loginScreen = new Intent(Cascade.this, LoginActivity.class);
+                                startActivity(loginScreen);
+                                finish();
+                            }
+                        }
+                    }, SPLASH_TIME_OUT);
+                } else {
+                    Toast.makeText(Cascade.this, "please turn on your devices GPS", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+            else{
+                Toast.makeText(Cascade.this, "you must have an internet connection to use this application", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
         else{
-            Intent loginScreen = new Intent(Cascade.this, LoginActivity.class);
-            startActivity(loginScreen);
             finish();
-        }*/
-
-            // check if wifi is on- turn off if not
-            turnOnWIFI();
-            // check if gps turned on-send user to settings menu if not
-            gpsSettingsMenu();
-
-            Intent loginScreen = new Intent(Cascade.this, LoginActivity.class);
-            startActivity(loginScreen);
-            finish();
-
         }
     }
 
@@ -95,6 +113,7 @@ public class Cascade extends Activity {
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();
             } else {
                 Log.i(TAG, "This device is not supported.");
+                Toast.makeText(Cascade.this, "this device is not supported by Google play services and cannot run this application", Toast.LENGTH_SHORT).show();
                 finish();
             }
             return false;
@@ -110,12 +129,37 @@ public class Cascade extends Activity {
         }
     }
 
+    // check is network active
+    public boolean isNetworkOnline() {
+        boolean status = false;
+        try {
+            ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = cm.getNetworkInfo(0);
+            if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED) {
+                status = true;
+            } else {
+                netInfo = cm.getNetworkInfo(1);
+                if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED) {
+                    status = true;
+                }
+            }
+        } catch (Exception ex) {
+            Log.e(TAG, "Error checking for network connectivity: " + ex.getMessage());
+            status = false;
+        }
+        return status;
+    }
+
     // if GPS is off send user to gps settings menu to turn it on
-    public void gpsSettingsMenu(){
+    public boolean gpsSettingsMenu(){
         final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
-        if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+        if ( !manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
             Intent intent=new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivity(intent);
+            return false;
+        }
+        else{
+            return true;
         }
     }
 
@@ -149,6 +193,10 @@ public class Cascade extends Activity {
                 if (imageView != null) {
                     imageView.setImageBitmap(bitmap);
                 }
+                begin();
+            }
+            else{
+                begin();
             }
         }
     }

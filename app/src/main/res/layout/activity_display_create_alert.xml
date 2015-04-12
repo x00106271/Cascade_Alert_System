@@ -13,111 +13,198 @@
         <!-- alert create Form -->
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:id="@+id/headercreate">
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="Alert Area"
-                android:layout_marginBottom="20dip"/>
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
+                android:layout_marginBottom="5dip"
+                android:textStyle="bold"
+                android:textColor="#372c24"/>
             <Spinner
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/alert_location_spinner"
                 android:spinnerMode="dialog"
-                android:layout_marginLeft="5dip"
+                android:layout_marginLeft="10dip"
                 android:layout_marginRight="5dip"
-                android:layout_marginBottom="20dip"/>
+                android:layout_marginStart="10dip"
+                android:layout_marginEnd="5dip"/>
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="Alert Type"
-                android:layout_marginBottom="20dip"
-                android:layout_marginTop="20dip"/>
+                android:layout_marginBottom="5dip"
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
+                android:textStyle="bold"
+                android:textColor="#372c24"/>
             <Spinner
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/alert_type_spinner"
-                android:entries="@array/alert_types"
                 android:spinnerMode="dialog"
-                android:layout_marginLeft="5dip"
+                android:layout_marginLeft="10dip"
                 android:layout_marginRight="5dip"
-                android:layout_marginBottom="20dip"/>
+                android:layout_marginStart="10dip"
+                android:layout_marginEnd="5dip"
+                android:layout_marginBottom="5dip"
+                android:drawSelectorOnTop="true"/>
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Title"/>
+                android:text="Title"
+                android:textStyle="bold"
+                android:textColor="#372c24"
+                android:layout_marginBottom="5dip"
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"/>
             <EditText android:id="@+id/alert_title"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="5dip"
                 android:layout_marginTop="5dip"
+                android:layout_marginLeft="10dip"
+                android:layout_marginStart="10dip"
+                android:layout_marginEnd="5dip"
+                android:layout_marginRight="5dip"
                 android:singleLine="true"/>
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="Description"
-                android:layout_marginBottom="20dip"/>
+                android:layout_marginBottom="5dip"
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
+                android:textStyle="bold"
+                android:textColor="#372c24"/>
             <EditText
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
+                    android:layout_height="wrap_content"
                     android:inputType="textMultiLine"
                     android:id="@+id/alertEditText"
-                    android:layout_gravity="top|left"
-                    android:layout_marginLeft="5dip"
-                    android:layout_marginRight="5dip"
-                    android:layout_marginBottom="20dip"/>
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="3"
-            android:layout_marginBottom="20dip">
+                    android:layout_gravity="top|start"
+                    android:layout_marginBottom="5dip"
+                    android:layout_marginTop="5dip"
+                    android:layout_marginLeft="10dip"
+                    android:layout_marginStart="10dip"
+                android:layout_marginEnd="5dip"
+                android:layout_marginRight="5dip"/>
+            <TextView android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Alert Date"
+                android:layout_marginBottom="5dip"
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
+                android:textStyle="bold"
+                android:textColor="#372c24"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
             <TextView android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dip"
-                android:layout_weight="2"
-                android:id="@+id/alertDate"/>
-            <Button
+                android:id="@+id/alertDate"
+                android:layout_weight="1"
+                android:layout_marginStart="20dip"
+                android:layout_marginLeft="20dip"
+                android:layout_marginBottom="5dip"/>
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="change date"
-                android:layout_weight="1"
-                android:id="@+id/setDateBtn"/>
-        </LinearLayout>
+                android:layout_weight="0"
+                android:layout_marginStart="80dip"
+                android:layout_marginLeft="80dip"
+                android:text="click to change date"
+                android:id="@+id/setDateBtn"
+                android:onClick="onClick"
+                android:clickable="true"
+                android:layout_marginBottom="5dip"
+                android:textColor="#0b84aa"/>
+            </LinearLayout>
         </LinearLayout>
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2"
+            android:orientation="vertical"
             android:layout_below="@id/headercreate"
             android:id="@+id/headercreate2"
-            android:layout_marginBottom="20dip">
-            <Button
-                android:layout_width="wrap_content"
+            android:layout_marginBottom="5dip">
+            <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Image"
-                android:layout_weight="1"
-                android:id="@+id/imageBtn"/>
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Video"
-                android:layout_weight="1"
-                android:id="@+id/videoBtn"/>
+                android:text="Add To Alert"
+                android:layout_marginBottom="5dip"
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
+                android:textStyle="bold"
+                android:textColor="#372c24"/>
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/headercreate7"
+            android:orientation="vertical"
+            android:layout_below="@id/headercreate2">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add An Image To The Alert"
+                android:layout_marginBottom="5dip"
+                android:layout_marginLeft="20dip"
+                android:layout_marginStart="20dip"
+                android:layout_marginTop="5dip"
+                android:id="@+id/imageBtn"
+                android:onClick="onClick"
+                android:clickable="true"
+                android:textColor="#0b84aa"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add A Video To The Alert"
+                android:layout_marginBottom="5dip"
+                android:layout_marginLeft="20dip"
+                android:layout_marginStart="20dip"
+                android:layout_marginTop="5dip"
+                android:id="@+id/videoBtn"
+                android:onClick="onClick"
+                android:clickable="true"
+                android:textColor="#0b84aa"/>
+            </LinearLayout>
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/headercreate3"
-            android:layout_below="@id/headercreate2"
+            android:layout_below="@id/headercreate7"
             android:orientation="vertical">
+            <TextView android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Is This Alert A Priority"
+                android:layout_marginBottom="5dip"
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
+                android:textStyle="bold"
+                android:textColor="#372c24"/>
             <CheckBox
                 android:id="@+id/checkPriority"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Priority" />
+                android:text="Yes" />
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Location"
-            android:layout_marginBottom="20dip"/>
+                android:text="Alert Location"
+                android:layout_marginBottom="5dip"
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
+                android:textStyle="bold"
+                android:textColor="#372c24"/>
             </LinearLayout>
         <LinearLayout
             android:layout_width="fill_parent"
@@ -125,8 +212,29 @@
             android:id="@+id/headercreate4"
             android:layout_below="@id/headercreate3"
             android:orientation="vertical"
-            android:layout_marginBottom="20dip">
-
+            android:layout_marginBottom="5dip">
+            <AutoCompleteTextView android:id="@+id/alert_auto_address"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dip"
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
+                android:layout_marginEnd="5dip"
+                android:layout_marginRight="5dip"
+                android:singleLine="false"
+                android:hint="Enter Address here"
+                android:gravity="center"/>
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                android:name="com.google.android.gms.maps.MapFragment"
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="200dip"
+                android:layout_marginRight="20dip"
+                android:layout_marginLeft="20dip"
+                android:layout_marginEnd="20dip"
+                android:layout_marginStart="20dip"
+                android:layout_marginBottom="20dip"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="fill_parent"
@@ -136,15 +244,17 @@
             android:orientation="horizontal"
             android:weightSum="1">
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dip"
                 android:layout_height="wrap_content"
                 android:text="Post"
                 android:layout_weight="1"
                 android:id="@+id/postBtn"
-                android:layout_marginBottom="20dip"/>
+                android:layout_marginBottom="20dip"
+                android:layout_marginLeft="20dip"
+                android:layout_marginStart="20dip"
+                android:layout_marginEnd="20dip"
+                android:layout_marginRight="20dip"/>
         </LinearLayout>
-
-
     </RelativeLayout>
 </ScrollView>
 

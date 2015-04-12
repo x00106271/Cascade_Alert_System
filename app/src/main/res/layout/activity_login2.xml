@@ -86,14 +86,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="40dip"
                 android:layout_marginBottom="40dip"
-                android:text="New? Register here"
+                android:text="New? Register Here"
                 android:gravity="center"
                 android:textSize="20dip"
                 android:textColor="#0b84aa"/>
             <TextView android:id="@+id/link_to_forgot_login"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Forgot password?"
+                android:text="Forgot Password?"
                 android:gravity="center"
                 android:textSize="20dip"
                 android:textColor="#0b84aa"/>

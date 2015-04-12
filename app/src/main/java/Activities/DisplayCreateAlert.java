@@ -2,6 +2,9 @@ package activities;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,8 +33,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import adaptors.PlaceAdaptor;
+import adaptors.SpinnerTypeAdaptor;
 import models.Alert;
 import models.Area;
+import services.Constants;
+import services.FetchCordinatesIntentService;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -40,7 +47,7 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     private String type,location,descriptionText,titleText;
     private Spinner spinner1,spinner2;
     private EditText description,title;
-    private Button image,video,changedate,post;
+    private Button post;
     private MobileService mService;
     private MobileServiceApp mApplication;
     private final String TAG = "CreateAlertActivity";
@@ -50,8 +57,9 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     private Date date;
     private int day,month,year;
     static final int DATE_DIALOG_ID=100;
-    private TextView textDate;
+    private TextView textDate, changedate,image,video;
     private AutoCompleteTextView autoCompleteTextView;
+    private AddressResultReceiver mResultReceiverGPS;
 
 
     @Override
@@ -66,24 +74,31 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         mService = mApplication.getMobileService();
 
         // create spinners
-        spinner1=(Spinner) findViewById(R.id.alert_type_spinner); // for the alert type
-        spinner2=(Spinner) findViewById(R.id.alert_location_spinner); // for the alert location
-        // spinner listener
-        spinner1.setOnItemSelectedListener(this);
+        spinner1 = (Spinner) findViewById(R.id.alert_type_spinner); // for the alert type
+        spinner2 = (Spinner) findViewById(R.id.alert_location_spinner); // for the alert location
 
-        // fill spinner dynamically from DB
-        arealist=new ArrayList<String>();
+        // fill spinner 2 dynamically from DB
+        arealist = new ArrayList<String>();
         addToSpinner();
 
+        //fill spinner 1
+        String[] list = {"Crime", "Fire", "Missing", "Stolen", "Road", "Service", "Weather", "Event"};
+        SpinnerTypeAdaptor adp1 = new SpinnerTypeAdaptor(this, R.layout.spinner_type, R.id.text_image_spinner, list);
+        spinner1.setAdapter(adp1);
+        spinner1.setOnItemSelectedListener(this);
+
         // text field for alert
-        description=(EditText) findViewById(R.id.alertEditText);
-        title=(EditText) findViewById(R.id.alert_title);
+        description = (EditText) findViewById(R.id.alertEditText);
+        title = (EditText) findViewById(R.id.alert_title);
+
+        // for reciever
+        mResultReceiverGPS = new AddressResultReceiver(new Handler());
 
         // buttons
-        image=(Button) findViewById(R.id.imageBtn);
-        video=(Button) findViewById(R.id.videoBtn);
-        changedate=(Button) findViewById(R.id.setDateBtn);
-        post=(Button) findViewById(R.id.postBtn);
+        image = (TextView) findViewById(R.id.imageBtn);
+        video = (TextView) findViewById(R.id.videoBtn);
+        changedate = (TextView) findViewById(R.id.setDateBtn);
+        post = (Button) findViewById(R.id.postBtn);
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,41 +117,39 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
                 showDialog(DATE_DIALOG_ID);
             }
         });
-        textDate=(TextView) findViewById(R.id.alertDate);
+        textDate = (TextView) findViewById(R.id.alertDate);
         setCurrentDate();
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                titleText=title.getText().toString().trim();
-                descriptionText=description.getText().toString().trim();
-                if(titleText.equals("")){
+                titleText = title.getText().toString().trim();
+                descriptionText = description.getText().toString().trim();
+                if (titleText.equals("")) {
                     Toast.makeText(DisplayCreateAlert.this, "alert must have a title",
                             Toast.LENGTH_LONG).show();
-                }
-                else{
+                } else {
                     addAlert();
                 }
             }
         });
 
         // checkbox for priority
-        priority=(CheckBox) findViewById(R.id.checkPriority);
+        priority = (CheckBox) findViewById(R.id.checkPriority);
         priority.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (((CheckBox) v).isChecked()) {
-                    priorityOn=1;
+                    priorityOn = 1;
                 }
             }
         });
-/*
-        // autocomplete address
-        autoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.atoText);
-        autoCompleteTextView.setOnClickListener(this);
-        autoCompleteTextView.requestFocus();
-        autoCompleteTextView.setAdapter(new PlaceHolder(MainActivity.this,R.layout.list_item_autocomplete));*/
-    }
 
+        // autocomplete address
+        autoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.alert_auto_address);
+        PlaceAdaptor pad = new PlaceAdaptor(DisplayCreateAlert.this, R.layout.address_autocomplete);
+        autoCompleteTextView.setAdapter(pad);
+        autoCompleteTextView.setOnItemSelectedListener(this);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -159,8 +172,11 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         if(id==R.id.alert_type_spinner){
             type=parent.getItemAtPosition(position).toString();
         }
-        else{
+        else if(id==R.id.alert_location_spinner){
             location=parent.getItemAtPosition(position).toString();
+        }
+        else{
+            // autocomplete
         }
     }
 
@@ -182,11 +198,9 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
                         arealist.add(item.getLabel());
                     }
                     ArrayAdapter<String> adp = new ArrayAdapter<String>(DisplayCreateAlert.this,
-                            android.R.layout.simple_dropdown_item_1line, arealist);
+                            android.R.layout.simple_spinner_dropdown_item, arealist);
                     spinner2.setAdapter(adp);
                     spinner2.setOnItemSelectedListener(DisplayCreateAlert.this);
-                } else {
-
                 }
             }
         });
@@ -297,4 +311,40 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
             date=new Date((year-1900),month,day);
         }
     };
+
+    // address receiver from service
+    class AddressResultReceiver extends ResultReceiver {
+
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if(resultCode == Constants.SUCCESS_RESULT_GPS){
+
+            }
+            else{
+                Toast.makeText(DisplayCreateAlert.this, "sorry the address was not found", Toast.LENGTH_LONG).show();
+            }
+
+        }
+    }
+
+    // get gps from address
+    public void getGPS(String address){
+        Intent intent = new Intent(DisplayCreateAlert.this, FetchCordinatesIntentService.class);
+        intent.putExtra("receiver", mResultReceiverGPS);
+        intent.putExtra("address",address);
+        startService(intent);
+        /*if (mGoogleApiClient.isConnected()){
+            Intent intent = new Intent(DisplayCreateAlert.this, FetchCordinatesIntentService.class);
+            intent.putExtra("receiver", mResultReceiverGPS);
+            intent.putExtra("address",address);
+            startService(intent);
+        }
+        else{
+            Toast.makeText(DisplayCreateAlert.this, "sorry your GPS services are unavailable and required to use this application", Toast.LENGTH_SHORT).show();
+        }*/
+    }
 }

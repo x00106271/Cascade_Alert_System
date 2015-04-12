@@ -27,7 +27,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+
 import java.util.Date;
+import java.util.List;
+
 import adaptors.PlaceAdaptor;
 import models.BaseUser;
 import models.GPS;
@@ -42,8 +46,8 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
 
     private String firstNameText, lastNameText,emailText,passwordText,passwordConfirm,referText,phoneText,dobTextbox;
     private EditText firstname, lastname,email,password,passwordC,refer,phone;
-    private TextView loginScreen,dob;
-    private Button submitButton,dobButton,locateButton;
+    private TextView loginScreen,dob,dobButton,locateButton;
+    private Button submitButton;
     private Date dobText;
     private int day,month,year;
     static final int DATE_PICKER_ID = 1111;
@@ -90,8 +94,8 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         refer=(EditText) findViewById(R.id.reg_refer);
         phone=(EditText) findViewById(R.id.reg_phone);
         submitButton=(Button) findViewById(R.id.regBtnSubmit);
-        dobButton=(Button) findViewById(R.id.regBtnDOB);
-        locateButton=(Button) findViewById(R.id.regFind);
+        dobButton=(TextView) findViewById(R.id.regBtnDOB);
+        locateButton=(TextView) findViewById(R.id.regFind);
         gps_id=null;
         year=1950;
         month=0;
@@ -123,7 +127,7 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
                 dobTextbox = dob.getText().toString().trim();
                 boolean proceed = validate(); // validate all user input
                 if (proceed) {
-                    getGPS(autoCompleteTextView.getText().toString()); // checks if address is correct and returns a gps co-ordinate
+                    checkEmailUnique();
                     } else {
                         submitButton.setEnabled(true);
                     }
@@ -163,11 +167,10 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
 
     // click listener for the auto complete
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        String str = (String) adapterView.getItemAtPosition(position);
-        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+
     }
 
-    // what happens when submit button pressed
+    // create user in DB
     public void submit(){
         dobText=new Date((year-1900),month,day);
         //create user and put in DB
@@ -249,6 +252,25 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         else{
             return false;
         }
+    }
+
+    // validate email address is unique (check it has not already been used)
+    public void checkEmailUnique(){
+        mService.checkEmail(emailText,new TableQueryCallback<BaseUser>() {
+
+            @Override
+            public void onCompleted(List<BaseUser> results, int count,
+                                    Exception exception, ServiceFilterResponse response) {
+                if(count==0){
+                    getGPS(autoCompleteTextView.getText().toString()); // checks if address is correct and returns a gps co-ordinate
+                }
+                else{
+                    Toast.makeText(RegisterActivity.this, "the email address you used is already in use by another user, pick a different email address", Toast.LENGTH_LONG).show();
+                    submitButton.setEnabled(true);
+                }
+            }
+            });
+
     }
 
     // date of birth dialog box
