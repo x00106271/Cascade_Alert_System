@@ -319,8 +319,6 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
     public void onConnectionFailed(ConnectionResult result) {
         // This callback is important for handling errors that
         // may occur while attempting to connect with Google.
-        //
-        // More about this in the next section.
         Toast.makeText(RegisterActivity.this, "error google connection failed", Toast.LENGTH_LONG).show();
     }
 
