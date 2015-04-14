@@ -16,14 +16,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:id="@+id/header">
-            <TextView android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#372c24"
-                android:layout_marginTop="20dip"
-                android:layout_marginBottom="20dip"
-                android:gravity="center"
-                android:textSize="32sp"
-                android:text="Register"/>
+
         </LinearLayout>
         <!--  Header Ends -->
 
@@ -231,7 +224,7 @@
                 android:text="Already have an account! Login here"
                 android:gravity="center"
                 android:textSize="20dip"
-                android:textColor="#025f7c"/>
+                android:textColor="#0b84aa"/>
         </LinearLayout>
         <!-- Login Form Ends -->
 

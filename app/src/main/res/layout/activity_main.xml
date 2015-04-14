@@ -7,47 +7,20 @@
     tools:context="activities.MainActivity"
     android:fillViewport="true">
         <!-- main Form -->
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dip"
-        android:weightSum="3"
-        android:id="@+id/buttonsTop">
-        <!-- android:layout_alignParentBottom="true" -->
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Alert"
-            android:id="@+id/alertBtn"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Message"
-            android:id="@+id/messageBtn"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Maps"
-            android:id="@+id/mapsBtn"/>
-    </LinearLayout>
+
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dip"
-            android:layout_below="@id/buttonsTop">
+            android:padding="5dip">
             <ListView
                 android:id="@+id/listViewAlerts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:listitem="@layout/alert_row"
-                android:padding="6dip" >
+                android:divider="@android:color/transparent"
+                android:dividerHeight="5.0sp">
 
             </ListView>
         </LinearLayout>

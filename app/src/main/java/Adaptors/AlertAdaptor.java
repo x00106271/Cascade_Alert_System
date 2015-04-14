@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.cascadealertsystem.R;
 import models.Alert;
@@ -26,7 +27,7 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View rowView=convertView;
-        final Alert current=getItem(position);
+        Alert current=getItem(position);
         if(rowView==null){
             LayoutInflater inflater = (LayoutInflater) mContext
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -34,43 +35,40 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
         }
         rowView.setTag(current);
 
-        final TextView type=(TextView) rowView.findViewById(R.id.alerttype);
-        final TextView date=(TextView) rowView.findViewById(R.id.alertdateshow);
-        final TextView title=(TextView) rowView.findViewById(R.id.alerttitle);
-        final TextView body=(TextView) rowView.findViewById(R.id.alertbody);
-        final TextView createdby=(TextView) rowView.findViewById(R.id.alertby);
-        final TextView comments=(TextView) rowView.findViewById(R.id.alertcomments);
+        TextView title=(TextView) rowView.findViewById(R.id.alert_title);
+        TextView body=(TextView) rowView.findViewById(R.id.alert_body);
+        TextView createdby=(TextView) rowView.findViewById(R.id.alert_who);
+        ImageView image=(ImageView) rowView.findViewById(R.id.alert_image_type);
 
         title.setText(current.getTitle());
         body.setText(current.getBody());
-        comments.setText("3 comments");
-        date.setText("11/11/11");
         createdby.setText("keyth");
-        type.setText(getType(current.getAlertType()));
+
+        if(current.getAlertType()==0){
+            image.setImageResource(R.drawable.crime);
+        }
+        else if(current.getAlertType()==1){
+            image.setImageResource(R.drawable.fire);
+        }
+        else if(current.getAlertType()==2){
+            image.setImageResource(R.drawable.missing2);
+        }
+        else if(current.getAlertType()==3){
+            image.setImageResource(R.drawable.stolen);
+        }
+        else if(current.getAlertType()==4){
+            image.setImageResource(R.drawable.road);
+        }
+        else if(current.getAlertType()==5){
+            image.setImageResource(R.drawable.service);
+        }
+        else if(current.getAlertType()==6){
+            image.setImageResource(R.drawable.weather);
+        }
+        else{
+            image.setImageResource(R.drawable.event);
+        }
 
         return rowView;
     }
-
-    // get type string from int value
-    public String getType(int id){
-        if(id==1){
-            return "crime";
-        }
-        else if(id==2){
-            return "missing";
-        }
-        else if(id==3){
-            return "traffic";
-        }
-        else if(id==4){
-            return "weather";
-        }
-        else if(id==5){
-            return "services";
-        }
-        else{ //event
-            return "event";
-        }
-    }
-
 }

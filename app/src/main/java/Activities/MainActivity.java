@@ -1,12 +1,12 @@
 package activities;
 
+import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.content.Intent;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -23,7 +23,6 @@ import services.MobileServiceApp;
 
 public class MainActivity extends ActionBarActivity {
 
-    private Button alert,message,maps;
     private AlertAdaptor mAdaptor;
     private final String TAG = "MainActivity";
     private MobileService mService;
@@ -35,10 +34,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        alert=(Button) findViewById(R.id.alertBtn);
-        message=(Button) findViewById(R.id.messageBtn);
-        maps=(Button) findViewById(R.id.mapsBtn);
 
         // for mobile services
         mApplication = (MobileServiceApp) getApplication();
@@ -55,58 +50,51 @@ public class MainActivity extends ActionBarActivity {
         alertList = (ListView) findViewById(R.id.listViewAlerts);
         alertList.setAdapter(mAdaptor);
 
-        // Listening to alert button pressed
-        alert.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent alertIntent=new Intent(MainActivity.this, DisplayCreateAlert.class);
-                startActivity(alertIntent);
-            }
-        });
-
-        // Listening to message button pressed
-        message.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-
-            }
-        });
-
-        // Listening to map button pressed
-        maps.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent mapIntent=new Intent(MainActivity.this,MapsActivity.class);
-                startActivity(mapIntent);
-            }
-        });
-
         // Load the items from the Mobile Service
         refreshItemsFromTable();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_alert:
+                Intent alertIntent=new Intent(MainActivity.this, DisplayCreateAlert.class);
+                startActivity(alertIntent);
+                return true;
+            case R.id.action_messages:
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.menu_settings) {
-            return true;
+                return true;
+            case R.id.action_map:
+                Intent mapIntent=new Intent(MainActivity.this,MapsActivity.class);
+                startActivity(mapIntent);
+                return true;
+            case R.id.action_refresh:
+                refreshItemsFromTable();
+                return true;
+            case R.id.action_settings:
+                // uses dropdown list so handled in menu_main.xml
+                return true;
+            case R.id.action_help:
+
+                return true;
+            case R.id.action_logout:
+                mService.logout();
+                finish();
+                return true;
+            case R.id.action_exit:
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        if (id == R.id.menu_refresh) {
-            refreshItemsFromTable();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     // add alerts

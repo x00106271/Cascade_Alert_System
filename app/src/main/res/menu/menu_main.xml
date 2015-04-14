@@ -5,13 +5,42 @@
 
     <!-- items in the action bar -->
 
-    <item android:id="@+id/menu_refresh"
-        android:title="@string/menu_refresh"
-        android:showAsAction="always" />
+    <item android:id="@+id/action_alert"
+        android:icon="@drawable/alert"
+        android:title="alert"
+        app:showAsAction="always" />
 
-    <item android:id="@+id/menu_settings"
-        android:title="@string/menu_settings"
-        android:showAsAction="always" />
+    <item android:id="@+id/action_messages"
+        android:icon="@drawable/message"
+        android:title="message"
+        app:showAsAction="always" />
 
+    <item android:id="@+id/action_map"
+        android:icon="@drawable/map"
+        android:title="map"
+        app:showAsAction="always" />
+
+    <item android:id="@+id/action_refresh"
+        android:icon="@drawable/refresh"
+        android:title="refresh"
+        app:showAsAction="always" />
+
+    <item android:id="@+id/action_settings"
+        android:icon="@drawable/settings"
+        android:title="settings"
+        app:showAsAction="always">
+        <menu>
+            <item android:id="@+id/action_help"
+                android:title="Help"
+                app:showAsAction="always"/>
+            <item android:id="@+id/action_logout"
+                android:title="Log Out"
+                app:showAsAction="always"/>
+            <item android:id="@+id/action_exit"
+                android:title="Exit CAS"
+                app:showAsAction="always"/>
+
+        </menu>
+        </item>
 
 </menu>

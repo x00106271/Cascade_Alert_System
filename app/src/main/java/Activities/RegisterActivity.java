@@ -1,6 +1,4 @@
 package activities;
-
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -11,7 +9,10 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -42,7 +43,7 @@ import services.MobileService;
 import services.MobileServiceApp;
 
 
-public class RegisterActivity extends Activity implements AdapterView.OnItemClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class RegisterActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private String firstNameText, lastNameText,emailText,passwordText,passwordConfirm,referText,phoneText,dobTextbox;
     private EditText firstname, lastname,email,password,passwordC,refer,phone;
@@ -163,6 +164,17 @@ public class RegisterActivity extends Activity implements AdapterView.OnItemClic
         autoCompleteTextView.setAdapter(pad);
         autoCompleteTextView.setOnItemClickListener(this);
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        return super.onOptionsItemSelected(item);
     }
 
     // click listener for the auto complete

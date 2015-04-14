@@ -2,66 +2,53 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:background="@drawable/borderblack">
 <LinearLayout
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:weightSum="3"
     android:id="@+id/alertline1"
     android:layout_alignParentRight="true"
     android:layout_alignParentEnd="true"
     android:layout_alignParentLeft="true"
     android:layout_alignParentStart="true">
-    <TextView
-        android:layout_width="fill_parent"
+    <ImageView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/alerttype"
-        android:layout_weight="0.7"/>
+        android:id="@+id/alert_image_type"/>
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/alertdateshow"
-        android:layout_weight="2.3"/>
+        android:id="@+id/alert_title"
+        android:inputType="textMultiLine"/>
     </LinearLayout>
     <TextView
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/alerttitle"
-        android:layout_below="@id/alertline1"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/alertbody"
-        android:layout_below="@id/alerttitle"/>
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/alertby"
-        android:layout_below="@id/alertbody"/>
+    android:id="@+id/alert_body"
+    android:layout_below="@id/alertline1"
+        android:inputType="textMultiLine"/>
 
     <!-- insert of an image or video will go here -->
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/alertby"
-        android:id="@+id/linearLayout"
-        android:weightSum="2">
+        android:layout_below="@id/alert_body"
+        android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/alertcomments"
-            android:onClick="onClick"
-            android:clickable="true"
+            android:layout_height="wrap_content"
+            android:id="@+id/alert_who"
             android:layout_weight="1"/>
-        <Button
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="COMMENT"
+            android:layout_height="wrap_content"
+            android:text="COMMENTS"
             android:id="@+id/alertBtnComment"
-            android:layout_weight="1"/>
+            android:onClick="onClick"
+            android:clickable="true"/>
         </LinearLayout>
 
 </RelativeLayout>
