@@ -9,16 +9,17 @@ import android.graphics.Point;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -38,32 +39,43 @@ public class Cascade extends Activity {
     private MobileServiceApp mApplication;
     private final String TAG = "OpeningActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private WifiManager wifiManager;
-    // Splash screen timer
-    private static int SPLASH_TIME_OUT = 2000;
+    private static int SPLASH_TIME_OUT = 2000; // Splash screen timer
+    private TextView text;
+    private Button btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /* create a full screen window */
+        /* create a full screen window for the logo image*/
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         setContentView(R.layout.activity_opening_screen);
 
         // create background image
         ImageView iv_background = (ImageView) findViewById(R.id.iv_background);
         BitmapWorkerTask task = new BitmapWorkerTask(iv_background);
         task.execute(R.drawable.splashscreenlogo);
-        turnOnWIFI(); // turn on wifi if is off
+
+        text=(TextView) findViewById(R.id.splash_text);
+        btn=(Button) findViewById(R.id.splash_btn);
+        btn.setVisibility(View.INVISIBLE);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                text.setText("");
+                btn.setVisibility(View.INVISIBLE);
+                begin();
+            }
+        });
     }
 
     // method that starts once background image has been loaded
     public void begin(){
         if(checkPlayServices()){ // check play services on device
             if(isNetworkOnline()) { // check network active on device
-                if (gpsSettingsMenu()) { // check gps active on device
+                if (gpsActive()) { // check gps active on device
 
                     // for mobile services
                     mApplication = (MobileServiceApp) getApplication();
@@ -86,13 +98,13 @@ public class Cascade extends Activity {
                         }
                     }, SPLASH_TIME_OUT);
                 } else {
-                    Toast.makeText(Cascade.this, "please turn on your devices GPS", Toast.LENGTH_SHORT).show();
-                    finish();
+                    text.setText("Please turn GPS on and then press the Retry button below");
+                    btn.setVisibility(View.VISIBLE);
                 }
             }
             else{
-                Toast.makeText(Cascade.this, "you must have an internet connection to use this application", Toast.LENGTH_SHORT).show();
-                finish();
+                text.setText("Please turn on the internet and then press the Retry button below");
+                btn.setVisibility(View.VISIBLE);
             }
         }
         else{
@@ -121,14 +133,6 @@ public class Cascade extends Activity {
         return true;
     }
 
-    // turn wifi on if it is not
-    public void turnOnWIFI(){
-        wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-        if(!wifiManager.isWifiEnabled()){
-            wifiManager.setWifiEnabled(true);
-        }
-    }
-
     // check is network active
     public boolean isNetworkOnline() {
         boolean status = false;
@@ -151,11 +155,9 @@ public class Cascade extends Activity {
     }
 
     // if GPS is off send user to gps settings menu to turn it on
-    public boolean gpsSettingsMenu(){
+    public boolean gpsActive(){
         final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
         if ( !manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
-            Intent intent=new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(intent);
             return false;
         }
         else{
@@ -163,7 +165,7 @@ public class Cascade extends Activity {
         }
     }
 
-    // asynch class for running background image (must be off main thread)
+    // asynch class for running background image (must be not on main thread)
     class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
         private final WeakReference<ImageView> imageViewReference;
         private int data = 0;

@@ -13,5 +13,21 @@ tools:context="com.cascadealertsystem.opening_screen">
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:id="@+id/iv_background"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/splash_btn"
+        android:layout_alignParentBottom="true"
+        android:text="Retry"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dip"/>
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/splash_text"
+    android:layout_above="@id/splash_btn"
+    android:layout_centerHorizontal="true"
+    android:gravity="center"
+    android:textColor="#ff0000"/>
 </RelativeLayout>
 

@@ -47,7 +47,6 @@
         <activity
             android:name="activities.RegisterActivity"
             android:label="Register"
-            android:noHistory="true"
             android:windowSoftInputMode="stateHidden"
             android:parentActivityName="activities.LoginActivity" >
             <meta-data

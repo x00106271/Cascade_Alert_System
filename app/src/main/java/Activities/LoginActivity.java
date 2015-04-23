@@ -3,9 +3,11 @@ package activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,7 +27,7 @@ public class LoginActivity extends Activity {
     private String emailText, passwordText;
     private EditText email, password;
     private TextView registerScreen, forgotPassword;
-    private Button loginButton;
+    private ImageButton loginButton;
     private MobileService mService;
     private MobileServiceApp mApplication;
     private final String TAG = "LoginActivity";
@@ -37,7 +39,7 @@ public class LoginActivity extends Activity {
 
         registerScreen = (TextView) findViewById(R.id.link_to_register);
         forgotPassword = (TextView) findViewById(R.id.link_to_forgot_login);
-        loginButton = (Button) findViewById(R.id.btnLogin);
+        loginButton = (ImageButton) findViewById(R.id.btnLogin);
         email = (EditText) findViewById(R.id.email_login);
         password = (EditText) findViewById(R.id.password_login);
 
@@ -50,42 +52,20 @@ public class LoginActivity extends Activity {
         loginButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                emailText = email.getText().toString().trim();
-                passwordText = password.getText().toString().trim();
-                if (emailText.equals("")) {
-                    Toast.makeText(LoginActivity.this, "enter an email address",
-                            Toast.LENGTH_LONG).show();
-                } else if (passwordText.equals("")) {
-                    Toast.makeText(LoginActivity.this, "enter your password",
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    BaseUser user = new BaseUser(emailText, passwordText);
-                    mService.validateUser(user, new TableQueryCallback<BaseUser>() {
+                login();
+            }
+        });
 
-                        @Override
-                        public void onCompleted(List<BaseUser> results, int count,
-                                                Exception exception, ServiceFilterResponse response) {
-                            if (exception == null) {
-                                if (count == 1) {
-                                    if(results.get(0).isVerified()){
-                                        mService.setUserId(results.get(0).getId());
-                                        mService.setAuthentication();
-                                        Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
-                                        startActivity(mainScreen);
-                                        finish();
-                                    }
-                                    else{
-                                        Toast.makeText(LoginActivity.this, "sorry you have not yet been verified by the administrator!",
-                                                Toast.LENGTH_LONG).show();
-                                    }
-                                } else {
-                                    Toast.makeText(LoginActivity.this, "wrong login information!!try again...",
-                                            Toast.LENGTH_LONG).show();
-                                }
-                            }
-                        }
-                    });
+        // keyboards log in on done button
+        password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    login();
+                    handled = true;
                 }
+                return handled;
             }
         });
 
@@ -93,6 +73,7 @@ public class LoginActivity extends Activity {
         registerScreen.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
+                registerScreen.setEnabled(false);
                 // Switching to Register screen
                 Intent regScreen = new Intent(getApplicationContext(), RegisterActivity.class);
                 startActivity(regScreen);
@@ -102,12 +83,77 @@ public class LoginActivity extends Activity {
 
         // listening to forgot password link
         forgotPassword.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View v) {
-                // Switching to Register screen
-                Toast.makeText(LoginActivity.this, "An email has been sent to your email address with your password",
-                        Toast.LENGTH_LONG).show();
+                forgotPassword.setEnabled(false);
+                emailText = email.getText().toString().trim();
+                if (emailText.equals("")) {
+                    Toast.makeText(LoginActivity.this, "You must enter an email address for us to find your lost password",
+                            Toast.LENGTH_LONG).show();
+                    forgotPassword.setEnabled(true);
+                } else {
+                    mService.checkEmail(emailText, new TableQueryCallback<BaseUser>() {
+
+                        @Override
+                        public void onCompleted(List<BaseUser> results, int count,
+                                                Exception exception, ServiceFilterResponse response) {
+                            if (count == 0) {
+                                Toast.makeText(LoginActivity.this, "That email address does not exist in the system",
+                                        Toast.LENGTH_LONG).show();
+                                forgotPassword.setEnabled(true);
+                            } else {
+                                Toast.makeText(LoginActivity.this, "An email has been sent to your email address with your password",
+                                        Toast.LENGTH_LONG).show();
+                                forgotPassword.setEnabled(true);
+                            }
+                        }
+                    });
+                }
             }
         });
+    }
+
+    // log in method
+    public void login() {
+        emailText = email.getText().toString().trim();
+        passwordText = password.getText().toString().trim();
+        if (emailText.equals("")) {
+            Toast.makeText(LoginActivity.this, "enter an email address",
+                    Toast.LENGTH_LONG).show();
+        } else if (passwordText.equals("")) {
+            Toast.makeText(LoginActivity.this, "enter your password",
+                    Toast.LENGTH_LONG).show();
+        } else {
+            loginButton.setEnabled(false);
+            BaseUser user = new BaseUser(emailText, passwordText);
+            mService.validateUser(user, new TableQueryCallback<BaseUser>() {
+
+                @Override
+                public void onCompleted(List<BaseUser> results, int count,
+                                        Exception exception, ServiceFilterResponse response) {
+                    if (exception == null) {
+                        if (count == 1) {
+                            if (results.get(0).isVerified()) {
+                                // get user area id
+                                mService.setAreaId(results.get(0).getId());
+                                // get user id and set authentication
+                                mService.setUserId(results.get(0).getId());
+                                // start main screen
+                                Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(mainScreen);
+                                finish();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "sorry you have not yet been verified by the administrator!",
+                                        Toast.LENGTH_LONG).show();
+                                loginButton.setEnabled(true);
+                            }
+                        } else {
+                            Toast.makeText(LoginActivity.this, "wrong login information!!try again...",
+                                    Toast.LENGTH_LONG).show();
+                            loginButton.setEnabled(true);
+                        }
+                    }
+                }
+            });
+        }
     }
 }

@@ -54,7 +54,8 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Email"/>
+                android:text="Email"
+                android:textStyle="bold"/>
             <EditText android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dip"
@@ -66,20 +67,23 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Password"/>
+                android:text="Password"
+                android:textStyle="bold"/>
             <EditText android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dip"
                 android:singleLine="true"
                 android:password="true"
                 android:inputType="textPassword"
-                android:id="@+id/password_login"/>
+                android:id="@+id/password_login"
+                android:imeOptions="actionDone"/>
             <!-- Login button -->
-            <Button android:id="@+id/btnLogin"
-                android:layout_width="fill_parent"
+            <ImageButton android:id="@+id/btnLogin"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dip"
-                android:text="Login"/>
+                android:src="@drawable/ok"
+                android:layout_gravity="center"/>
             <!-- Link to Registration Screen -->
             <TextView android:id="@+id/link_to_register"
                 android:layout_width="fill_parent"

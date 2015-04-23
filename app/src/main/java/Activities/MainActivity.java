@@ -35,13 +35,16 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        //mService.setAuthentication();
+
         // for mobile services
         mApplication = (MobileServiceApp) getApplication();
         mApplication.setCurrentActivity(this);
         mService = mApplication.getMobileService();
 
         // get area id of user
-        getAreaId();
+        //getAreaId();
         /*Toast.makeText(MainActivity.this, mService.getAreaId(),
                 Toast.LENGTH_LONG).show();*/
 
@@ -118,13 +121,13 @@ public class MainActivity extends ActionBarActivity {
     }
 
     // get area ids of user
-    public void getAreaId(){
+    /*public void getAreaId(){
         mService.setAreaId(new TableQueryCallback<UserArea>(){
             @Override
             public void onCompleted(List<UserArea> result,int count,Exception e,ServiceFilterResponse response){
                 mService.setAreaId(result);
             };
         });
-    }
+    }*/
 
 }

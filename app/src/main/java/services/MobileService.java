@@ -32,7 +32,8 @@ public class MobileService {
     private Context mContext;
     private final String TAG = "CAS mobile services. ";
     private String mUserId;
-    private List<UserArea> mAreaId;
+    private String mAreaId;
+    private List<UserArea> mAreaIds;
     private String mEmail;
 
     public MobileService(Context context) {
@@ -77,6 +78,7 @@ public class MobileService {
             String area=settings.getString("areaid",null);
             if (user != null && !user.equals("")) {
                 mUserId=user;
+                mAreaId=area;
                 return true;
             }
             else{
@@ -93,6 +95,7 @@ public class MobileService {
         SharedPreferences settings = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
         SharedPreferences.Editor preferencesEditor = settings.edit();
         preferencesEditor.putString("userid", mUserId);
+        preferencesEditor.putString("areaid", mAreaId);
         preferencesEditor.commit();
     }
 
@@ -118,13 +121,25 @@ public class MobileService {
         mUserAreaTable.where().field("userId").eq(mUserId).execute(callback);
     }
 
-    public void setAreaId(List<UserArea> area){
-        mAreaId=area;
+    public void setAreaId(String userid){
+        final String id=userid;
+        new Thread(new Runnable() {
+            public void run(){
+                try{
+                    mAreaIds=mUserAreaTable.where().field("userId").eq(id).execute().get();
+                    mAreaId=mAreaIds.get(0).getAreaId();
+                    setAuthentication();
+                }catch (Exception exception) {
+                    Log.i(TAG," could not get area id");
+                }
+            }
+        }).start();
     }
+
     public String getUserId(){
         return mUserId;
     }
-    public List<UserArea> getAreaId(){
+    public String getAreaId(){
         return mAreaId;
     }
 
@@ -155,7 +170,7 @@ public class MobileService {
         mGPSTable.insert(gps, callback);
     }
 
-    // check email unique in register screen
+    // check email unique in register screen/ check email exists for forgot password login screen
     public void checkEmail(String email,TableQueryCallback<BaseUser> callback) {
         mBaseUserTable.where().field("email").eq(email).execute(callback);
     }

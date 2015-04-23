@@ -168,12 +168,23 @@ public class RegisterActivity extends ActionBarActivity implements AdapterView.O
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_register, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent screen = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(screen);
+                finish();
+                return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
