@@ -1,15 +1,12 @@
 package models;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Alert{
     @com.google.gson.annotations.SerializedName("Id")
 private String Id;
-    @com.google.gson.annotations.SerializedName("alerttype")
-private int alertType;
+    @com.google.gson.annotations.SerializedName("alertType")
+    private int alertType;
     @com.google.gson.annotations.SerializedName("title")
 private String title;
     @com.google.gson.annotations.SerializedName("body")
@@ -18,30 +15,18 @@ private String body;
 private boolean complete;
     @com.google.gson.annotations.SerializedName("active")
 private boolean active;
-    @com.google.gson.annotations.SerializedName("createdby")
+    @com.google.gson.annotations.SerializedName("createdBy")
 private String createdBy;
     @com.google.gson.annotations.SerializedName("broadcast")
 private boolean broadcast;
     @com.google.gson.annotations.SerializedName("priority")
 private int priority;
-    @com.google.gson.annotations.SerializedName("gpsid")
+    @com.google.gson.annotations.SerializedName("gpsId")
 private String gpsId;
-    @com.google.gson.annotations.SerializedName("startdatetime")
+    @com.google.gson.annotations.SerializedName("startDateTime")
 private Date startDateTime;
-    @com.google.gson.annotations.SerializedName("enddatetime")
+    @com.google.gson.annotations.SerializedName("endDateTime")
 private Date endDateTime;
-
-public ArrayList<BaseUser> RespondingGarda;
-
-public ArrayList<Area> Areas;
-
-public Map<String, Integer> Recipients;
-
-public Map<String, Integer> ReadBy;
-
-public Map<String, Integer> AcceptedBy;
-
-public ArrayList<MediaAsset> MediaAssets;
 
 public Alert() {
 
@@ -51,7 +36,7 @@ public Alert(String itemId,int alerttype, String createdBy, String title, String
         Date startDateTime, Date endDateTime,
         boolean broadcast, int priority,String gps, boolean active, boolean complete)
         {
-        this.Id = itemId;
+            this.Id = itemId;
         this.alertType=alerttype;
         this.createdBy = createdBy;
         this.title = title;
@@ -63,13 +48,6 @@ public Alert(String itemId,int alerttype, String createdBy, String title, String
         this.active = active;
         this.complete = complete;
         this.gpsId=gps;
-
-        Areas = new ArrayList<Area>();
-        RespondingGarda = new ArrayList<BaseUser>();
-        Recipients = new HashMap<String, Integer>();
-        ReadBy = new HashMap<String, Integer>();
-        AcceptedBy = new HashMap<String, Integer>();
-        MediaAssets = new ArrayList<MediaAsset>();
         }
 
     public Alert(int alerttype, String createdBy, String title, String body,
@@ -90,6 +68,10 @@ public Alert(String itemId,int alerttype, String createdBy, String title, String
 
     public void setId(String id) {
         Id = id;
+    }
+
+    public int getAlertType() {
+        return alertType;
     }
 
     public void setAlertType(int alertType) {
@@ -140,9 +122,7 @@ public Alert(String itemId,int alerttype, String createdBy, String title, String
         return Id;
     }
 
-    public int getAlertType() {
-        return alertType;
-    }
+
 
     public String getTitle() {
         return title;
@@ -188,6 +168,5 @@ public Alert(String itemId,int alerttype, String createdBy, String title, String
     public boolean equals(Object o) {
         return o instanceof Alert && ((Alert) o).Id == Id;
     }
-
 
 }

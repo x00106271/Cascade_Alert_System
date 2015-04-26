@@ -5,18 +5,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.util.Log;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.List;
 
 import activities.LoginActivity;
 import models.Alert;
 import models.Area;
 import models.BaseUser;
+import models.Comment;
 import models.GPS;
 import models.UserArea;
 
@@ -29,6 +32,7 @@ public class MobileService {
     private MobileServiceTable<Alert> mAlertTable;
     private MobileServiceTable<UserArea> mUserAreaTable;
     private MobileServiceTable<GPS> mGPSTable;
+    private MobileServiceTable<Comment> mCommentTable;
     private Context mContext;
     private final String TAG = "CAS mobile services. ";
     private String mUserId;
@@ -42,11 +46,15 @@ public class MobileService {
             mClient = new MobileServiceClient(Constants.MOBILE_SERVICE_URL,
                     Constants.MOBILE_SERVICE_APPLICATION_KEY, mContext);
 
+            mClient.registerDeserializer(Date.class,new DateDeserializer());
+            mClient.registerSerializer(Date.class,new DateSerializer());
+
             mBaseUserTable = mClient.getTable(BaseUser.class);
             mAreaTable=mClient.getTable(Area.class);
             mAlertTable=mClient.getTable(Alert.class);
             mUserAreaTable=mClient.getTable(UserArea.class);
             mGPSTable=mClient.getTable(GPS.class);
+            mCommentTable=mClient.getTable(Comment.class);
 
         } catch (MalformedURLException e) {
             Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
@@ -67,7 +75,6 @@ public class MobileService {
         mEmail=user.getEmail();
         mBaseUserTable.where().field("email").eq(user.getEmail()).and().field("password")
         .eq(user.getPassword()).execute(callback);
-        // .and().field("verified").eq(true)
     }
 
     // check if user details stored on device
@@ -116,24 +123,9 @@ public class MobileService {
         mUserId=user;
     }
 
-    // set area id from DB
-    public void setAreaId(TableQueryCallback<UserArea> callback){
-        mUserAreaTable.where().field("userId").eq(mUserId).execute(callback);
-    }
-
-    public void setAreaId(String userid){
-        final String id=userid;
-        new Thread(new Runnable() {
-            public void run(){
-                try{
-                    mAreaIds=mUserAreaTable.where().field("userId").eq(id).execute().get();
-                    mAreaId=mAreaIds.get(0).getAreaId();
-                    setAuthentication();
-                }catch (Exception exception) {
-                    Log.i(TAG," could not get area id");
-                }
-            }
-        }).start();
+    // set area id from login
+    public void setAreaIdLogin(String id,TableQueryCallback<UserArea> callback) {
+        mUserAreaTable.where().field("userId").eq(id).execute(callback);
     }
 
     public String getUserId(){
@@ -142,6 +134,8 @@ public class MobileService {
     public String getAreaId(){
         return mAreaId;
     }
+    //set area id
+    public void setAreaId(String id) {this.mAreaId=id;}
 
                         /** Other Methods **/
 
@@ -174,5 +168,33 @@ public class MobileService {
     public void checkEmail(String email,TableQueryCallback<BaseUser> callback) {
         mBaseUserTable.where().field("email").eq(email).execute(callback);
     }
+
+    // load alerts on main screen load
+    public void loadAlerts(TableQueryCallback<BaseUser> callback){
+        mBaseUserTable.where().execute(callback);
+    }
+
+    // get comment for alert
+    public void loadComments(TableQueryCallback<Comment> callback){
+        mCommentTable.where().execute(callback);
+    }
+
+    // add comment to DB
+    public void addComment(Comment com){
+        final Comment com2=com;
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    mCommentTable.insert(com2);
+                } catch (Exception exception) {
+                    Log.i("add comment error: ",exception.getMessage());
+                }
+                return null;
+            }
+        }.execute();
+    }
+
 
 }

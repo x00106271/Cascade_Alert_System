@@ -20,7 +20,9 @@
                 android:layout_height="wrap_content"
                 tools:listitem="@layout/alert_row"
                 android:divider="@android:color/transparent"
-                android:dividerHeight="5.0sp">
+                android:dividerHeight="5.0sp"
+                android:descendantFocusability="beforeDescendants"
+                android:focusable="false">
 
             </ListView>
         </LinearLayout>

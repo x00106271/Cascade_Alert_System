@@ -9,7 +9,9 @@ public class MobileServiceApp extends Application {
     private Activity mCurrentActivity;
     private boolean mIsApplicationActive = false;
 
-    public MobileServiceApp() {}
+    public MobileServiceApp() {
+
+    }
 
     public MobileService getMobileService() {
         if (mService == null) {
@@ -31,5 +33,7 @@ public class MobileServiceApp extends Application {
     }
 
     public boolean getIsApplicationActive() { return mIsApplicationActive; }
+
+
 
 }

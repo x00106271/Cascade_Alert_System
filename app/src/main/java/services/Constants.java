@@ -3,12 +3,11 @@ package services;
 
 import android.location.Address;
 import android.location.Location;
-
 import java.util.List;
 
 public final class Constants {
 
-    public static String MOBILE_SERVICE_URL = "";
+    public static String MOBILE_SERVICE_URL = "https://cascade.azure-mobile.net/";
     public static String MOBILE_SERVICE_APPLICATION_KEY = "";
     public static String GOOGLE_PLACES_API="";
 
@@ -20,4 +19,5 @@ public final class Constants {
     public static Location LOCATION=null;
     public static List<Address> ADDRESSLIST=null;
     public static Address ADDRESS_GPS=null;
+
 }

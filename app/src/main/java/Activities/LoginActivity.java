@@ -18,6 +18,7 @@ import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import java.util.List;
 
 import models.BaseUser;
+import models.UserArea;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -133,20 +134,32 @@ public class LoginActivity extends Activity {
                     if (exception == null) {
                         if (count == 1) {
                             if (results.get(0).isVerified()) {
-                                // get user area id
-                                mService.setAreaId(results.get(0).getId());
-                                // get user id and set authentication
+                                // set user id
                                 mService.setUserId(results.get(0).getId());
-                                // start main screen
-                                Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(mainScreen);
-                                finish();
-                            } else {
-                                Toast.makeText(LoginActivity.this, "sorry you have not yet been verified by the administrator!",
-                                        Toast.LENGTH_LONG).show();
-                                loginButton.setEnabled(true);
-                            }
-                        } else {
+                                mService.setAreaIdLogin(results.get(0).getId(), new TableQueryCallback<UserArea>() {
+                                            @Override
+                                            public void onCompleted(List<UserArea> results, int count,
+                                                                    Exception exception, ServiceFilterResponse response) {
+                                                if(exception==null){
+                                                    mService.setAreaId(results.get(0).getAreaId());
+                                                    mService.setAuthentication();
+                                                    // start main screen
+                                                    Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
+                                                    startActivity(mainScreen);
+                                                    finish();
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    else
+
+                                    {
+                                        Toast.makeText(LoginActivity.this, "sorry you have not yet been verified by the administrator!",
+                                                Toast.LENGTH_LONG).show();
+                                        loginButton.setEnabled(true);
+                                    }
+                                }else {
                             Toast.makeText(LoginActivity.this, "wrong login information!!try again...",
                                     Toast.LENGTH_LONG).show();
                             loginButton.setEnabled(true);

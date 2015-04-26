@@ -3,52 +3,116 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@drawable/borderblack">
+    android:background="@drawable/mainborder">
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:id="@+id/alertline1"
-    android:layout_alignParentRight="true"
-    android:layout_alignParentEnd="true"
     android:layout_alignParentLeft="true"
-    android:layout_alignParentStart="true">
+    android:layout_alignParentStart="true"
+    android:background="@drawable/border">
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:id="@+id/alert_image_type"/>
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:id="@+id/alert_title"
-        android:inputType="textMultiLine"/>
+        android:inputType="textMultiLine"
+        android:gravity="center"
+        android:background="@drawable/border_left"
+        android:textAllCaps="true"
+        android:textStyle="bold"/>
     </LinearLayout>
     <TextView
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:id="@+id/alert_body"
     android:layout_below="@id/alertline1"
-        android:inputType="textMultiLine"/>
-
-    <!-- insert of an image or video will go here -->
-
+    android:inputType="textMultiLine"
+    android:background="@drawable/border"
+    android:padding="2dip"/>
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/alert_media"
+        android:layout_below="@id/alert_body"
+        android:background="@drawable/border"/>
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/alert_who"
+        android:layout_below="@id/alert_media"
+        android:gravity="center_vertical"/>
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/alert_date"
+        android:layout_below="@id/alert_who"
+        android:background="@drawable/border"
+        android:gravity="center_vertical"/>
+    <ImageButton
+        android:id="@+id/alert_image_dropdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/alert_who"
+        android:src="@drawable/alert_options"
+        android:background="@drawable/mainborder"
+        android:focusable="false"
+        android:focusableInTouchMode="false"/>
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/alert_body"
-        android:orientation="horizontal">
+        android:id="@+id/alert_dropdown"
+        android:orientation="vertical"
+        android:layout_below="@id/alert_date"
+        android:background="@drawable/border">
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/alert_comments"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/alert_who"
-            android:layout_weight="1"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="COMMENTS"
-            android:id="@+id/alertBtnComment"
-            android:onClick="onClick"
-            android:clickable="true"/>
+            android:gravity="center"
+            android:paddingBottom="5dip"
+            android:paddingTop="5dip"
+            android:background="@drawable/border"
+            android:focusable="false"
+            android:focusableInTouchMode="false"/>
+
         </LinearLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/alert_dropdown"
+        android:gravity="right"
+        android:weightSum="1">
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/alert_add_comment"
+            android:hint="Add comment..."
+            android:inputType="textMultiLine"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_weight="1"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/alert_post"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:text="post"
+            android:focusable="false"
+            android:focusableInTouchMode="false"/>
+     </LinearLayout>
+
+
 
 </RelativeLayout>

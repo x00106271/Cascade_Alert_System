@@ -17,19 +17,19 @@ public class BaseUser {
     private boolean verified;
     @com.google.gson.annotations.SerializedName("supervisor")
     private String supervisor;
-    @com.google.gson.annotations.SerializedName("firstname")
+    @com.google.gson.annotations.SerializedName("firstName")
     private String firstname;
-    @com.google.gson.annotations.SerializedName("lastname")
+    @com.google.gson.annotations.SerializedName("lastName")
     private String lastname;
-    @com.google.gson.annotations.SerializedName("DOB")
+    @com.google.gson.annotations.SerializedName("dOB")
     private Date DOB;
-    @com.google.gson.annotations.SerializedName("Phone")
+    @com.google.gson.annotations.SerializedName("phone")
     private String Phone;
-    @com.google.gson.annotations.SerializedName("SmartPhoneUser")
+    @com.google.gson.annotations.SerializedName("smartPhoneUser")
     private boolean SmartPhoneUser;
-    @com.google.gson.annotations.SerializedName("UserLevel")
+    @com.google.gson.annotations.SerializedName("userLevel")
     private int UserLevel;
-    @com.google.gson.annotations.SerializedName("AddressId")
+    @com.google.gson.annotations.SerializedName("addressId")
     private String AddressId;
     @com.google.gson.annotations.SerializedName("ReferralName")
     private String ReferralName;
@@ -95,6 +95,12 @@ public class BaseUser {
         /*ArrayList<Area> areas, ArrayList<GPS> gps
         areas = new ArrayList<Area>(areas);
         Gps = new ArrayList<GPS>(gps);*/
+    }
+
+    public BaseUser(String id,String first,String last){
+        this.Id=id;
+        this.firstname=first;
+        this.lastname=last;
     }
 
     public String getEmail() {

@@ -1,12 +1,17 @@
 package activities;
 
-import android.graphics.Color;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.content.Intent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -14,10 +19,12 @@ import com.cascadealertsystem.R;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
+import java.util.ArrayList;
 import java.util.List;
 import adaptors.AlertAdaptor;
 import models.Alert;
-import models.UserArea;
+import models.BaseUser;
+import models.Comment;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -28,6 +35,8 @@ public class MainActivity extends ActionBarActivity {
     private MobileService mService;
     private MobileServiceApp mApplication;
     private ListView alertList;
+    private ArrayList<Names> list;
+    private ArrayList<Comment> list2;
 
 
     @Override
@@ -35,26 +44,32 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        //mService.setAuthentication();
+        // keyboard setting
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN|
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         // for mobile services
         mApplication = (MobileServiceApp) getApplication();
         mApplication.setCurrentActivity(this);
         mService = mApplication.getMobileService();
 
-        // get area id of user
-        //getAreaId();
-        /*Toast.makeText(MainActivity.this, mService.getAreaId(),
-                Toast.LENGTH_LONG).show();*/
-
         // adaptor for displaying alerts
         mAdaptor=new AlertAdaptor(MainActivity.this);
         alertList = (ListView) findViewById(R.id.listViewAlerts);
+        alertList.setItemsCanFocus(false);
+        alertList.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
         alertList.setAdapter(mAdaptor);
+        alertList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-        // Load the items from the Mobile Service
-        refreshItemsFromTable();
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    final int position, long id) {
+
+            }
+        });
+
+        // Load the alerts from the Mobile Service
+        loadAlerts();
     }
 
     @Override
@@ -100,34 +115,112 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    // add alerts
+    // add alerts from refresh
     private void refreshItemsFromTable() {
-        mService.getAlerts(new TableQueryCallback<Alert>() {
+        mService.loadComments(new TableQueryCallback<Comment>() {
 
             @Override
-            public void onCompleted(List<Alert> results, int count,
+            public void onCompleted(List<Comment> results, int count,
                                     Exception exception, ServiceFilterResponse response) {
                 if (exception == null) {
-                    mAdaptor.clear();
-                    for (Alert item : results) {
-                        mAdaptor.add(item);
+                    list2=new ArrayList<>();
+                    for (Comment item : results) {
+                        list2.add(item);
                     }
+                    mAdaptor.setCommentList(list2);
+                    mService.getAlerts(new TableQueryCallback<Alert>() {
+
+                        @Override
+                        public void onCompleted(List<Alert> results, int count,
+                                                Exception exception, ServiceFilterResponse response) {
+                            if (exception == null){
+                                mAdaptor.clear();
+                                for (Alert item : results) {
+                                    mAdaptor.add(item);
+                                }
+                            } else {
+                                Toast.makeText(MainActivity.this, "Sorry there was an error loading alerts",
+                                        Toast.LENGTH_LONG).show();
+                                Log.i("alerts load exception: ",exception.getMessage());
+                            }
+                        }
+                    });
                 } else {
-                    Toast.makeText(MainActivity.this, "error loading alerts",
-                            Toast.LENGTH_LONG).show();
+                    Log.i("comments load",exception.getMessage());
                 }
             }
         });
     }
 
-    // get area ids of user
-    /*public void getAreaId(){
-        mService.setAreaId(new TableQueryCallback<UserArea>(){
+    // get alerts at loadup
+    public void loadAlerts(){
+        mService.loadAlerts(new TableQueryCallback<BaseUser>() {
+
             @Override
-            public void onCompleted(List<UserArea> result,int count,Exception e,ServiceFilterResponse response){
-                mService.setAreaId(result);
-            };
+            public void onCompleted(List<BaseUser> results, int count,
+                                    Exception exception, ServiceFilterResponse response) {
+                if(exception==null){
+                    list=new ArrayList<>();
+                    for(int i=0;i<results.size();i++){
+                        list.add(new Names(results.get(i).getId(),results.get(i).getFirstName(),results.get(i).getLastName()));
+                    }
+                    mAdaptor.setList(list);
+                    mService.loadComments(new TableQueryCallback<Comment>() {
+
+                        @Override
+                        public void onCompleted(List<Comment> results, int count,
+                                                Exception exception, ServiceFilterResponse response) {
+                            if (exception == null) {
+                                list2=new ArrayList<>();
+                                for (Comment item : results) {
+                                    list2.add(item);
+                                }
+                                mAdaptor.setCommentList(list2);
+                                mService.getAlerts(new TableQueryCallback<Alert>() {
+
+                                    @Override
+                                    public void onCompleted(List<Alert> results, int count,
+                                                            Exception exception, ServiceFilterResponse response) {
+                                        if (exception == null){
+                                            mAdaptor.clear();
+                                            for (Alert item : results) {
+                                                mAdaptor.add(item);
+                                            }
+                                        } else {
+                                            Toast.makeText(MainActivity.this, "Sorry there was an error loading alerts",
+                                                    Toast.LENGTH_LONG).show();
+                                            Log.i("alerts load exception: ",exception.getMessage());
+                                        }
+                                    }
+                                });
+                            } else {
+                                Log.i("comments load",exception.getMessage());
+                            }
+                        }
+                    });
+                }
+                else{
+                    Log.i("loading names: ",exception.getMessage());
+                }
+            }
         });
-    }*/
+    }
+
+    // object to hold types for name list
+    public class Names{
+        public String id;
+        public String first;
+        public String last;
+        Names(String i,String f,String l){
+            this.id=i;
+            this.first=f;
+            this.last=l;
+        }
+    }
+
+
+    public void addComment(Comment com){
+        mService.addComment(com);
+    }
 
 }
