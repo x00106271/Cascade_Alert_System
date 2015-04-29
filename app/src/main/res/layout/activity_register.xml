@@ -69,7 +69,7 @@
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"
-                android:text="Phone"
+                android:text="Phone (mobile phone numbers only)"
                 android:textStyle="bold"/>
             <EditText android:id="@+id/reg_phone"
                 android:layout_width="fill_parent"
@@ -101,7 +101,6 @@
                 android:singleLine="true"
                 android:layout_marginTop="5dip"
                 android:layout_marginBottom="20dip"/>
-            // person they know label
             <TextView android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#372c24"

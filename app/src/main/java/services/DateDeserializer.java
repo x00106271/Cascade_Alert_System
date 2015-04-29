@@ -22,8 +22,9 @@ public class DateDeserializer implements JsonDeserializer<Date> {
                             JsonDeserializationContext ctx) throws JsonParseException {
         String strVal = element.getAsString();
         try {
-            return deserialize(strVal);
+                return deserialize(strVal);
         } catch (ParseException e) {
+            Log.i("date not being parsed: ",strVal);
             throw new JsonParseException(e);
         }
 
@@ -32,7 +33,9 @@ public class DateDeserializer implements JsonDeserializer<Date> {
     public static Date deserialize(String strVal) throws ParseException {
         // Change Z to +00:00 to adapt the string to a format
         // that can be parsed in Java
-        String s = strVal.replace("Z", "+00:00");
+        String s=strVal;
+        s=s.substring(0, 19)+"Z";
+        s= s.replace("Z", "+00:00");
         try {
             // Remove the ":" character to adapt the string to a
             // format
@@ -41,7 +44,6 @@ public class DateDeserializer implements JsonDeserializer<Date> {
         } catch (IndexOutOfBoundsException e) {
             throw new JsonParseException("Invalid length");
         }
-
         // Parse the well-formatted date string
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ssZ");

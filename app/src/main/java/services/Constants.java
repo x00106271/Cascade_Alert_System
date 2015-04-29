@@ -8,8 +8,8 @@ import java.util.List;
 public final class Constants {
 
     public static String MOBILE_SERVICE_URL = "https://cascade.azure-mobile.net/";
-    public static String MOBILE_SERVICE_APPLICATION_KEY = "";
-    public static String GOOGLE_PLACES_API="";
+    public static String MOBILE_SERVICE_APPLICATION_KEY = "TVkGQDWdaeNNbNKirTHAknOUmHqWgu76";
+    public static String GOOGLE_PLACES_API="AIzaSyD0PMnTgVwCCofclYlklu4uxvW9eAZjiWU";
 
     //for geocoder
     public static final int SUCCESS_RESULT = 0;

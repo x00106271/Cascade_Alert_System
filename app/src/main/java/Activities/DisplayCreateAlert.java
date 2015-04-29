@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -55,6 +56,8 @@ import services.Constants;
 import services.FetchCordinatesIntentService;
 import services.MobileService;
 import services.MobileServiceApp;
+import services.PhotoGallery;
+import services.VideoGallery;
 
 public class DisplayCreateAlert extends ActionBarActivity implements AdapterView.OnItemSelectedListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -133,13 +136,15 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent=new Intent(DisplayCreateAlert.this, PhotoGallery.class);
+                startActivity(intent);
             }
         });
         video.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(DisplayCreateAlert.this, VideoGallery.class);
+                startActivity(intent);
             }
         });
         changedate.setOnClickListener(new View.OnClickListener() {

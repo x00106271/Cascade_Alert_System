@@ -6,7 +6,16 @@
     android:layout_height="fill_parent"
     tools:context="activities.MainActivity"
     android:fillViewport="true">
-        <!-- main Form -->
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleLargeInverse"
+        android:indeterminate="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
+    <!-- main Form -->
 
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"

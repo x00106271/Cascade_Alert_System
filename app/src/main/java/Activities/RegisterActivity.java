@@ -197,7 +197,7 @@ public class RegisterActivity extends ActionBarActivity implements AdapterView.O
     public void submit(){
         dobText=new Date((year-1900),month,day);
         //create user and put in DB
-        BaseUser newuser=new BaseUser(emailText, passwordText, false, firstNameText, lastNameText, dobText,0, phoneText, referText,gps_id);
+        BaseUser newuser=new BaseUser(emailText, passwordText, false, firstNameText, lastNameText, dobText,0, valNumber(phoneText), referText,gps_id);
         mService.createUser(newuser, new TableOperationCallback<BaseUser>() {
             @Override
             public void onCompleted(BaseUser entity, Exception exception,
@@ -250,6 +250,10 @@ public class RegisterActivity extends ActionBarActivity implements AdapterView.O
         }
         else if(phoneText.equals("")){
             Toast.makeText(this, "please supply a phone number", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        else if(phoneText.length()!=10){
+            Toast.makeText(this, "the phone number entered is wrong", Toast.LENGTH_LONG).show();
             return false;
         }
         else if(!emailText.equals("")){
@@ -433,5 +437,12 @@ public class RegisterActivity extends ActionBarActivity implements AdapterView.O
 
             }
         });
+    }
+
+    // change phone number to international
+    public String valNumber(String num){
+        String num2=num.substring(0,9);
+        num2="+353"+num2;
+        return num2;
     }
 }

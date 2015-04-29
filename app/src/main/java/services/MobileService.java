@@ -21,6 +21,8 @@ import models.Area;
 import models.BaseUser;
 import models.Comment;
 import models.GPS;
+import models.RecipientAlert;
+import models.SMSForgots;
 import models.UserArea;
 
 public class MobileService {
@@ -33,10 +35,12 @@ public class MobileService {
     private MobileServiceTable<UserArea> mUserAreaTable;
     private MobileServiceTable<GPS> mGPSTable;
     private MobileServiceTable<Comment> mCommentTable;
+    private MobileServiceTable<RecipientAlert> mRATable;
+    private MobileServiceTable<SMSForgots> mPForgotTable;
     private Context mContext;
     private final String TAG = "CAS mobile services. ";
     private String mUserId;
-    private String mAreaId;
+    private String mAreaId=null;
     private List<UserArea> mAreaIds;
     private String mEmail;
 
@@ -55,6 +59,8 @@ public class MobileService {
             mUserAreaTable=mClient.getTable(UserArea.class);
             mGPSTable=mClient.getTable(GPS.class);
             mCommentTable=mClient.getTable(Comment.class);
+            mRATable=mClient.getTable(RecipientAlert.class);
+            mPForgotTable=mClient.getTable(SMSForgots.class);
 
         } catch (MalformedURLException e) {
             Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
@@ -156,7 +162,7 @@ public class MobileService {
 
     //fill main screen with alerts
     public void getAlerts(TableQueryCallback<Alert> callback) {
-        mAlertTable.where().execute(callback);
+        mAlertTable.where().field("active").eq(true).execute(callback);
     }
 
     // create gps in DB
@@ -196,5 +202,61 @@ public class MobileService {
         }.execute();
     }
 
+    //add to recipient alert table for messaging
+    public void addRecipient(){
+        //mRATable.insert();
+    }
+
+    //  add entry to forgot password table
+    public void addForgotPassword(SMSForgots send){
+        final SMSForgots toSend=send;
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    mPForgotTable.insert(toSend);
+                } catch (Exception exception) {
+                    Log.i("forgot error: ",exception.getMessage());
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    // delete an alert (alert itself not being deleted just the alert being made inactive)
+    public void deleteAlert(Alert a){
+        final Alert up=a;
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    mAlertTable.update(up).get();
+                } catch (Exception exception) {
+                    Log.i("delete alert error: ",exception.getMessage());
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    //update an alert
+    public void updateAlert(Alert a){
+        final Alert up=a;
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    mAlertTable.update(up).get();
+
+                } catch (Exception exception) {
+                    Log.i("update alert error: ",exception.getMessage());
+                }
+                return null;
+            }
+        }.execute();
+    }
 
 }

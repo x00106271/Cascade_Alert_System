@@ -18,6 +18,7 @@ import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import java.util.List;
 
 import models.BaseUser;
+import models.SMSForgots;
 import models.UserArea;
 import services.MobileService;
 import services.MobileServiceApp;
@@ -88,7 +89,7 @@ public class LoginActivity extends Activity {
                 forgotPassword.setEnabled(false);
                 emailText = email.getText().toString().trim();
                 if (emailText.equals("")) {
-                    Toast.makeText(LoginActivity.this, "You must enter an email address for us to find your lost password",
+                    Toast.makeText(LoginActivity.this, "You must enter an email address for us to text you a password",
                             Toast.LENGTH_LONG).show();
                     forgotPassword.setEnabled(true);
                 } else {
@@ -102,8 +103,10 @@ public class LoginActivity extends Activity {
                                         Toast.LENGTH_LONG).show();
                                 forgotPassword.setEnabled(true);
                             } else {
-                                Toast.makeText(LoginActivity.this, "An email has been sent to your email address with your password",
+                                Toast.makeText(LoginActivity.this, "A text message has been sent to your mobile",
                                         Toast.LENGTH_LONG).show();
+                                SMSForgots send=new SMSForgots(emailText);
+                                mService.addForgotPassword(send);
                                 forgotPassword.setEnabled(true);
                             }
                         }
@@ -136,20 +139,29 @@ public class LoginActivity extends Activity {
                             if (results.get(0).isVerified()) {
                                 // set user id
                                 mService.setUserId(results.get(0).getId());
-                                mService.setAreaIdLogin(results.get(0).getId(), new TableQueryCallback<UserArea>() {
-                                            @Override
-                                            public void onCompleted(List<UserArea> results, int count,
-                                                                    Exception exception, ServiceFilterResponse response) {
-                                                if(exception==null){
-                                                    mService.setAreaId(results.get(0).getAreaId());
-                                                    mService.setAuthentication();
-                                                    // start main screen
-                                                    Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
-                                                    startActivity(mainScreen);
-                                                    finish();
-                                                }
+                                if(results.get(0).getUserLevel()!=2){ // if garda dont load area id
+                                    mService.setAreaIdLogin(results.get(0).getId(), new TableQueryCallback<UserArea>() {
+                                        @Override
+                                        public void onCompleted(List<UserArea> results, int count,
+                                                                Exception exception, ServiceFilterResponse response) {
+                                            if(exception==null){
+                                                mService.setAreaId(results.get(0).getAreaId());
+                                                mService.setAuthentication();
+                                                // start main screen
+                                                Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
+                                                startActivity(mainScreen);
+                                                finish();
                                             }
-                                        });
+                                        }
+                                    });
+                                }
+                                else{
+                                    mService.setAuthentication();
+                                    // start main screen
+                                    Intent mainScreen = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(mainScreen);
+                                    finish();
+                                }
                                     }
 
                                     else
