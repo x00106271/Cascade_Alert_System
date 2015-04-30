@@ -1,8 +1,9 @@
 package activities;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,11 +18,23 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.cascadealertsystem.R;
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.blob.CloudBlob;
+import com.microsoft.azure.storage.blob.CloudBlobClient;
+import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
+import com.google.android.gms.gcm.*;
+import com.microsoft.windowsazure.messaging.*;
+import com.microsoft.windowsazure.notifications.NotificationsManager;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import adaptors.AlertAdaptor;
@@ -29,6 +42,9 @@ import adaptors.HelpAdaptor;
 import models.Alert;
 import models.BaseUser;
 import models.Comment;
+import models.MediaAsset;
+import models.OutputFile;
+import services.Constants;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -42,13 +58,28 @@ public class MainActivity extends ActionBarActivity {
     private ArrayList<Names> list;
     private ArrayList<Comment> list2;
     private ProgressBar spinner;
-    public static Bitmap image;
+    private ArrayList<Alert> alerts;
+    private ArrayList<MediaAsset> media;
+    private Context mContext;
+    private static ArrayList<OutputFile> files;
 
+    //notification hub
+    private String SENDER_ID = "Constants.NOTIFICATION_API";
+    private GoogleCloudMessaging gcm;
+    private NotificationHub hub;
+    private String HubName = "cascadehub";
+    private String HubListenConnectionString = "Endpoint=sb://cascadehub-ns.servicebus.windows.net/;SharedAccessKeyName=DefaultListenSharedAccessSignature;SharedAccessKey=9BpUxwsyqwMr8/DjuEtBy1BLpGAsrAWfBLCgxTuxH9M=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mContext = this;
+
+        //lists
+        alerts=new ArrayList<>();
+        media=new ArrayList<>();
+        files=new ArrayList<>();
 
         // load progress spinner
         spinner = (ProgressBar)findViewById(R.id.progressBar1);
@@ -82,6 +113,7 @@ public class MainActivity extends ActionBarActivity {
         loadAlerts();
     }
 
+    // action bar menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -89,6 +121,7 @@ public class MainActivity extends ActionBarActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    // action bar menu onclick handler
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
@@ -140,13 +173,13 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    // add alerts from refresh
+    // add alerts from refresh button
     private void refreshItemsFromTable() {
         mService.loadComments(new TableQueryCallback<Comment>() {
 
             @Override
             public void onCompleted(List<Comment> results, int count,
-                                    Exception exception, ServiceFilterResponse response) {
+                                    Exception exception, ServiceFilterResponse response) { // load comments
                 if (exception == null) {
                     list2=new ArrayList<>();
                     for (Comment item : results) {
@@ -157,12 +190,29 @@ public class MainActivity extends ActionBarActivity {
 
                         @Override
                         public void onCompleted(List<Alert> results, int count,
-                                                Exception exception, ServiceFilterResponse response) {
+                                                Exception exception, ServiceFilterResponse response) { // load alerts
                             if (exception == null){
-                                mAdaptor.clear();
                                 for (Alert item : results) {
-                                    mAdaptor.add(item);
+                                    alerts.add(item);
                                 }
+                                mService.getMediaList(new TableQueryCallback<MediaAsset>() {
+
+                                    @Override
+                                    public void onCompleted(List<MediaAsset> results, int count,
+                                                            Exception exception, ServiceFilterResponse response) { // load media table list
+                                        if (exception == null) {
+                                            for (MediaAsset item : results) {
+                                                media.add(item);
+                                            }
+                                            loadAdaptor(); // load alerts into adapter to show on main screen
+                                        } else {
+                                            spinner.setVisibility(View.GONE);
+                                            Toast.makeText(MainActivity.this, "Sorry there was an error loading alerts",
+                                                    Toast.LENGTH_LONG).show();
+                                            Log.i("media load exception: ", exception.getMessage());
+                                        }
+                                    }
+                                });
                             } else {
                                 Toast.makeText(MainActivity.this, "Sorry there was an error loading alerts",
                                         Toast.LENGTH_LONG).show();
@@ -177,13 +227,13 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
-    // get alerts at loadup
+    // get alerts at load up of activity
     public void loadAlerts(){
         mService.loadAlerts(new TableQueryCallback<BaseUser>() {
 
             @Override
             public void onCompleted(List<BaseUser> results, int count,
-                                    Exception exception, ServiceFilterResponse response) {
+                                    Exception exception, ServiceFilterResponse response) { //names of users and there ids
                 if(exception==null){
                     list=new ArrayList<>();
                     for(int i=0;i<results.size();i++){
@@ -194,7 +244,7 @@ public class MainActivity extends ActionBarActivity {
 
                         @Override
                         public void onCompleted(List<Comment> results, int count,
-                                                Exception exception, ServiceFilterResponse response) {
+                                                Exception exception, ServiceFilterResponse response) { //comments
                             if (exception == null) {
                                 list2=new ArrayList<>();
                                 for (Comment item : results) {
@@ -205,13 +255,29 @@ public class MainActivity extends ActionBarActivity {
 
                                     @Override
                                     public void onCompleted(List<Alert> results, int count,
-                                                            Exception exception, ServiceFilterResponse response) {
+                                                            Exception exception, ServiceFilterResponse response) { //alerts
                                         if (exception == null){
-                                            mAdaptor.clear();
-                                            spinner.setVisibility(View.GONE);
                                             for (Alert item : results) {
-                                                mAdaptor.add(item);
+                                                alerts.add(item);
                                             }
+                                            mService.getMediaList(new TableQueryCallback<MediaAsset>() {
+
+                                                @Override
+                                                public void onCompleted(List<MediaAsset> results, int count,
+                                                                        Exception exception, ServiceFilterResponse response) { //media
+                                                    if (exception == null) {
+                                                        for (MediaAsset item : results) {
+                                                            media.add(item);
+                                                        }
+                                                        loadAdaptor(); // adapter load
+                                                    } else {
+                                                        spinner.setVisibility(View.GONE);
+                                                        Toast.makeText(MainActivity.this, "Sorry there was an error loading alerts",
+                                                                Toast.LENGTH_LONG).show();
+                                                        Log.i("media load exception: ", exception.getMessage());
+                                                    }
+                                                }
+                                            });
                                         } else {
                                             spinner.setVisibility(View.GONE);
                                             Toast.makeText(MainActivity.this, "Sorry there was an error loading alerts",
@@ -284,5 +350,111 @@ public class MainActivity extends ActionBarActivity {
     //update an alert
     public void updateAlert(Alert a){
         mService.updateAlert(a);
+    }
+
+    // load adaptor
+    public void loadAdaptor(){
+        for (Alert item : alerts) { //alerts
+            for(MediaAsset ma:media){ //matching media (if any) to alerts
+                if(ma.getAlertId().equals(item.getId())){ //if found download file from blob
+                    final String dataid=ma.getData();
+                    final String alertid=item.getId();
+                    final String ext=ma.getExt();
+                    new Thread(new Runnable() {
+                        public void run() {
+                            try
+                            {
+                                CloudStorageAccount storageAccount = CloudStorageAccount.parse(Constants.storageConnectionString);
+                                CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
+                                CloudBlobContainer container = blobClient.getContainerReference("assets");
+                                container.createIfNotExists();
+                                // Loop through each blob item in the container.
+                                for (ListBlobItem blobItem : container.listBlobs()) {
+                                    // If the item is a blob, not a virtual directory.
+                                    if (blobItem instanceof CloudBlob) {
+                                        // Download the item and save it to a file in cache
+                                        CloudBlob blob = (CloudBlob) blobItem;
+                                        if(blob.getName().equals(dataid)){
+                                            File output=File.createTempFile("download", null, mContext.getCacheDir()); //temp file held in cache directory
+                                            blob.download(new FileOutputStream(output));
+                                            String filename=output.getAbsolutePath(); //path to temp file
+                                            Log.i("FILE: ",filename);
+                                            output.deleteOnExit(); // delete file when program ends
+                                            MainActivity.files.add(new OutputFile(alertid,filename,ext));
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Log.i("download file error: ",e.getMessage());
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+        mAdaptor.clear();
+        spinner.setVisibility(View.GONE);
+        mAdaptor.setFileList(files);
+        Log.i("NOW","NOW");       // this (NOW NOW) is showing up in the logs, then all the alerts are being loaded in adapter,
+        for(OutputFile f:files){  // and then the files come back from download. its the same with both async task and thread
+            Log.i("file id: ",f.getId());
+            Log.i("file path: ",f.getPath());
+        }
+        for(Alert item:alerts){
+            mAdaptor.add(item);
+        }
+    }
+
+
+    //notification hub
+    @SuppressWarnings("unchecked")
+    private void registerWithNotificationHubs() {
+        new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object... params) {
+                try {
+                    String regid = gcm.register(SENDER_ID);
+                    DialogNotify("Registered Successfully","RegId : " +
+                            hub.register(regid).getRegistrationId());
+                } catch (Exception e) {
+                    DialogNotify("Exception",e.getMessage());
+                    return e;
+                }
+                return null;
+            }
+        }.execute(null, null, null);
+    }
+
+    /**
+     * A modal AlertDialog for displaying a message on the UI thread
+     * when theres an exception or message to report.
+     *
+     * @param title   Title for the AlertDialog box.
+     * @param message The message displayed for the AlertDialog box.
+     */
+    public void DialogNotify(final String title,final String message)
+    {
+        final AlertDialog.Builder dlg;
+        dlg = new AlertDialog.Builder(this);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog dlgAlert = dlg.create();
+                dlgAlert.setTitle(title);
+                dlgAlert.setButton(DialogInterface.BUTTON_POSITIVE,
+                        (CharSequence) "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                dlgAlert.setMessage(message);
+                dlgAlert.setCancelable(false);
+                dlgAlert.show();
+            }
+        });
     }
 }

@@ -3,8 +3,12 @@ package activities;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.MediaStore;
@@ -42,6 +46,8 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -52,12 +58,11 @@ import adaptors.SpinnerTypeAdaptor;
 import models.Alert;
 import models.Area;
 import models.GPS;
+import models.MediaAsset;
 import services.Constants;
 import services.FetchCordinatesIntentService;
 import services.MobileService;
 import services.MobileServiceApp;
-import services.PhotoGallery;
-import services.VideoGallery;
 
 public class DisplayCreateAlert extends ActionBarActivity implements AdapterView.OnItemSelectedListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -83,6 +88,8 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     private ImageButton search;
     private boolean addressFound;
     private String gpsId;
+    private File media;
+    private String pickedType;
 
 
     @Override
@@ -136,15 +143,19 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(DisplayCreateAlert.this, PhotoGallery.class);
-                startActivity(intent);
+                // start intent to get photo
+                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                photoPickerIntent.setType("image/*");
+                startActivityForResult(photoPickerIntent, 100);
             }
         });
         video.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(DisplayCreateAlert.this, VideoGallery.class);
-                startActivity(intent);
+                // start intent to get video
+                Intent videoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                videoPickerIntent.setType("video/*");
+                startActivityForResult(videoPickerIntent, 200);
             }
         });
         changedate.setOnClickListener(new View.OnClickListener() {
@@ -200,16 +211,12 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_display_create_alert, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         return super.onOptionsItemSelected(item);
     }
@@ -266,10 +273,30 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
                             Toast.LENGTH_LONG).show();
                     post.setEnabled(true);
                 } else {
-                    Toast.makeText(DisplayCreateAlert.this, "alert created",
-                            Toast.LENGTH_LONG).show();
-                    mGoogleApiClient.disconnect();
-                    finish();
+                    MediaAsset ma=new MediaAsset(null,entity.getId(),pickedType);
+                    mService.insertMedia(ma,new TableOperationCallback<MediaAsset>() {
+                        @Override
+                        public void onCompleted(MediaAsset entity, Exception exception,
+                                                ServiceFilterResponse response) {
+
+                            if (exception != null) {
+                                Log.e(TAG, exception.getMessage());
+                                Toast.makeText(DisplayCreateAlert.this, "error...try again!!",
+                                        Toast.LENGTH_LONG).show();
+                                post.setEnabled(true);
+                            } else {
+                                String a=entity.getId()+pickedType;
+                                mService.uploadFile(a,media);
+                                entity.setData(entity.getId());
+                                mService.updateMedia(entity);
+                                Toast.makeText(DisplayCreateAlert.this, "alert created",
+                                        Toast.LENGTH_LONG).show();
+                                mGoogleApiClient.disconnect();
+                                finish();
+                            }
+
+                        }
+                    });
                 }
 
             }
@@ -480,4 +507,89 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
             }
         });
     }
+
+    //retured from photo/video intent
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
+        super.onActivityResult(requestCode, resultCode, returnedIntent);
+        if(requestCode==100){ //photo
+            if(resultCode == RESULT_OK){
+                Uri selectedImage = returnedIntent.getData();
+                String path=getRealPathFromURI(selectedImage);
+                media=new File(path);
+                video.setEnabled(false);
+                image.setTextColor(Color.GREEN);
+                pickedType=".jpg";
+            }
+            else{
+                Toast.makeText(DisplayCreateAlert.this, "an error occurred picking an image...try again", Toast.LENGTH_LONG).show();
+            }
+        }
+        else{ // video
+            if(resultCode == RESULT_OK){
+                Uri selectedVideo = returnedIntent.getData();
+                String path=getRealPathFromURI(selectedVideo);
+                media=new File(path);
+                image.setEnabled(false);
+                video.setTextColor(Color.GREEN);
+                pickedType=".mp4";
+            }
+            else{
+                Toast.makeText(DisplayCreateAlert.this, "an error occurred picking a video...try again", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    // get filepath from uri
+    private String getRealPathFromURI(Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        CursorLoader loader = new CursorLoader(this, contentUri, proj, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
 }
+
+/*
+// downsize image to avoid out of memory errors
+    private Bitmap decodeUri(Uri selectedImage) throws FileNotFoundException {
+
+        // Decode image size
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        o.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImage), null, o);
+
+        // The new size we want to scale to
+        final int REQUIRED_SIZE = 140;
+
+        // Find the correct scale value. It should be the power of 2.
+        int width_tmp = o.outWidth, height_tmp = o.outHeight;
+        int scale = 1;
+        while (true) {
+            if (width_tmp / 2 < REQUIRED_SIZE
+                    || height_tmp / 2 < REQUIRED_SIZE) {
+                break;
+            }
+            width_tmp /= 2;
+            height_tmp /= 2;
+            scale *= 2;
+        }
+
+        // Decode with inSampleSize
+        BitmapFactory.Options o2 = new BitmapFactory.Options();
+        o2.inSampleSize = scale;
+        return BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImage), null, o2);
+
+    }
+
+    Bitmap reSizedImage=decodeUri(selectedImage);
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(90);
+                        Bitmap rotatedBitmap = Bitmap.createBitmap(reSizedImage, 0, 0, reSizedImage.getWidth(),
+                                reSizedImage.getHeight(), matrix, true);
+                        targetImage.setImageBitmap(rotatedBitmap);
+
+    targetvideo.setVideoURI(selectedVideo);
+
+ */

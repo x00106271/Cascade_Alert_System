@@ -6,11 +6,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.util.Log;
+
+import com.microsoft.azure.storage.*;
+import com.microsoft.azure.storage.blob.*;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+import com.microsoft.windowsazure.notifications.NotificationsManager;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
@@ -21,14 +29,14 @@ import models.Area;
 import models.BaseUser;
 import models.Comment;
 import models.GPS;
+import models.MediaAsset;
 import models.RecipientAlert;
 import models.SMSForgots;
 import models.UserArea;
 
 public class MobileService {
 
-    //Mobile Services objects
-    private MobileServiceClient mClient;
+    public static MobileServiceClient mClient;
     private MobileServiceTable<BaseUser> mBaseUserTable;
     private MobileServiceTable<Area> mAreaTable;
     private MobileServiceTable<Alert> mAlertTable;
@@ -37,18 +45,29 @@ public class MobileService {
     private MobileServiceTable<Comment> mCommentTable;
     private MobileServiceTable<RecipientAlert> mRATable;
     private MobileServiceTable<SMSForgots> mPForgotTable;
+    private MobileServiceTable<MediaAsset> mMediaTable;
     private Context mContext;
     private final String TAG = "CAS mobile services. ";
     private String mUserId;
     private String mAreaId=null;
     private List<UserArea> mAreaIds;
     private String mEmail;
+    private CloudStorageAccount storageAccount;
+    private CloudBlobClient blobClient;
+    private CloudBlobContainer container;
+    private CloudBlockBlob blob;
+    public static final String SENDER_ID = "395945727516";
 
     public MobileService(Context context) {
+
         mContext = context;
+
+        // mobile service
         try {
             mClient = new MobileServiceClient(Constants.MOBILE_SERVICE_URL,
                     Constants.MOBILE_SERVICE_APPLICATION_KEY, mContext);
+
+            NotificationsManager.handleNotifications(mContext, SENDER_ID, MyHandler.class);
 
             mClient.registerDeserializer(Date.class,new DateDeserializer());
             mClient.registerSerializer(Date.class,new DateSerializer());
@@ -61,6 +80,7 @@ public class MobileService {
             mCommentTable=mClient.getTable(Comment.class);
             mRATable=mClient.getTable(RecipientAlert.class);
             mPForgotTable=mClient.getTable(SMSForgots.class);
+            mMediaTable=mClient.getTable(MediaAsset.class);
 
         } catch (MalformedURLException e) {
             Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
@@ -242,14 +262,13 @@ public class MobileService {
     }
 
     //update an alert
-    public void updateAlert(Alert a){
-        final Alert up=a;
+    public void updateAlert(final Alert a){
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    mAlertTable.update(up).get();
+                    mAlertTable.update(a).get();
 
                 } catch (Exception exception) {
                     Log.i("update alert error: ",exception.getMessage());
@@ -257,6 +276,145 @@ public class MobileService {
                 return null;
             }
         }.execute();
+    }
+
+                             /** Storage Methods **/
+
+    public void uploadFile(final String name,final File media){
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try
+                {
+                    storageAccount = CloudStorageAccount.parse(Constants.storageConnectionString);
+                    blobClient = storageAccount.createCloudBlobClient();
+                    container = blobClient.getContainerReference("assets");
+                    container.createIfNotExists();
+                    // name the file and upload it
+                    blob = container.getBlockBlobReference(name);
+                    blob.upload(new FileInputStream(media), media.length());
+                }
+                catch (Exception e)
+                {
+                    Log.i("upload file error: ",e.getMessage());
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    public void listFiles(){
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try
+                {
+                    storageAccount = CloudStorageAccount.parse(Constants.storageConnectionString);
+                    blobClient = storageAccount.createCloudBlobClient();
+                    container = blobClient.getContainerReference("assets");
+                    container.createIfNotExists();
+                    // Loop over blobs within the container and output the URI to each of them.
+                    for (ListBlobItem blobItem : container.listBlobs()) {
+                        Log.i("file: ", blobItem.getUri().toString());
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.i("list files error: ",e.getMessage());
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    // this file is being called in main activity file instead
+    public void downloadFile(final String name){
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try
+                {
+                    storageAccount = CloudStorageAccount.parse(Constants.storageConnectionString);
+                    blobClient = storageAccount.createCloudBlobClient();
+                    container = blobClient.getContainerReference("assets");
+                    container.createIfNotExists();
+                    // Loop through each blob item in the container.
+                    for (ListBlobItem blobItem : container.listBlobs()) {
+                        // If the item is a blob, not a virtual directory.
+                        if (blobItem instanceof CloudBlob) {
+                            // Download the item and save it to a file with the same name.
+                            CloudBlob blob = (CloudBlob) blobItem;
+                            if(blob.getName().equals(name)){
+                                File output=File.createTempFile("download",null,mContext.getCacheDir());
+                                String filename=output.getAbsolutePath();
+                                blob.download(new FileOutputStream(output));
+                                output.deleteOnExit(); // delete file when program ends
+                                Log.i("download NAME: ",filename);
+                            }
+                        }
+                    }
+
+
+                }
+                catch (Exception e)
+                {
+                    Log.i("download file error: ",e.getMessage());
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    public void deleteFile(){
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try
+                {
+                    storageAccount = CloudStorageAccount.parse(Constants.storageConnectionString);
+                    blobClient = storageAccount.createCloudBlobClient();
+                    container = blobClient.getContainerReference("assets");
+                    container.createIfNotExists();
+                    // Retrieve reference to a blob named "myimage.jpg".
+                    CloudBlockBlob blob = container.getBlockBlobReference("myimage.jpg");
+
+                    // Delete the blob.
+                    blob.deleteIfExists();
+                }
+                catch (Exception e)
+                {
+                    Log.i("delete file error: ",e.getMessage());
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    // insert into media assets table
+    public void insertMedia(MediaAsset med,TableOperationCallback<MediaAsset> callback) {
+        mMediaTable.insert(med, callback);
+
+    }
+
+    //update the media asset table
+    public void updateMedia(final MediaAsset a){
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                mMediaTable.update(a);
+                return null;
+            }
+        }.execute();
+    }
+
+    //get media assets list
+    public void getMediaList(TableQueryCallback<MediaAsset> callback){
+        mMediaTable.where().execute(callback);
     }
 
 }

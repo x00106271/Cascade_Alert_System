@@ -9,7 +9,8 @@ public final class Constants {
 
     public static String MOBILE_SERVICE_URL = "https://cascade.azure-mobile.net/";
     public static String MOBILE_SERVICE_APPLICATION_KEY = "TVkGQDWdaeNNbNKirTHAknOUmHqWgu76";
-    public static String GOOGLE_PLACES_API="AIzaSyD0PMnTgVwCCofclYlklu4uxvW9eAZjiWU";
+    public static String GOOGLE_PLACES_API="AIzaSyCBqHiEcTimiosMI5MR4F_iepoQ1168sBg";
+    public static String NOTIFICATION_API="AIzaSyCKcWNdvXvKyHQaSyIZ_7DaL7Hx093wWwU";
 
     //for geocoder
     public static final int SUCCESS_RESULT = 0;
@@ -19,5 +20,12 @@ public final class Constants {
     public static Location LOCATION=null;
     public static List<Address> ADDRESSLIST=null;
     public static Address ADDRESS_GPS=null;
+
+    //for azure storage
+    public static final String storageConnectionString =
+            "DefaultEndpointsProtocol=https;" +
+                    "AccountName=cascadeblobs;" +
+                    "AccountKey=yt6ZAtI3i5tAstNinKj+vqG8eb8GREsdDYQvLGR7Vzg2HKg1NANJt973vrwtgFCsdqqcfog8L1xHy5JmhbSJdw==;"+
+                    "BlobEndpoint=https://cascadeblobs.blob.core.windows.net;";
 
 }

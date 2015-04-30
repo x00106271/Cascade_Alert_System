@@ -32,6 +32,7 @@ import java.util.Date;
 import activities.MainActivity;
 import models.Alert;
 import models.Comment;
+import models.OutputFile;
 
 
 public class AlertAdaptor extends ArrayAdapter<Alert> {
@@ -39,6 +40,7 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
     private Context mContext;
     private ArrayList<MainActivity.Names> names;
     private ArrayList<Comment> comments;
+    private ArrayList<OutputFile> files;
 
     public AlertAdaptor(Context context) {
         super(context, R.layout.alert_row);
@@ -67,12 +69,12 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
             holder.comment = (TextView) rowView.findViewById(R.id.alert_comments);
             holder.post = (Button) rowView.findViewById(R.id.alert_post);
             holder.addPost = (EditText) rowView.findViewById(R.id.alert_add_comment);
-            holder.drop=(ImageButton)rowView.findViewById(R.id.alert_image_dropdown);
+            holder.drop = (ImageButton) rowView.findViewById(R.id.alert_image_dropdown);
             rowView.setTag(holder);
         } else {
             holder = (viewHolder) rowView.getTag();
         }
-        LinearLayout layout=(LinearLayout)holder.comment.getParent();
+        LinearLayout layout = (LinearLayout) holder.comment.getParent();
         clearComments(layout);
         holder.comment.setEnabled(true);
         holder.title.setText(current.getTitle());
@@ -82,25 +84,25 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
         holder.comment.setText("view comments (" + getNumComments(current.getId()) + ")");
         holder.addPost.setText("");
         holder.addPost.setHint("Add comment...");
-        final String aid=current.getCreatedBy();
+        final String aid = current.getCreatedBy();
 
         holder.post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LinearLayout layout=(LinearLayout) v.getParent();
-                EditText com=(EditText)layout.findViewById(R.id.alert_add_comment);
-                String s=com.getText().toString();
-                if(!s.equals("")){
-                    Comment nCom=new Comment(current.getId(),current.getCreatedBy(),s);
+                LinearLayout layout = (LinearLayout) v.getParent();
+                EditText com = (EditText) layout.findViewById(R.id.alert_add_comment);
+                String s = com.getText().toString();
+                if (!s.equals("")) {
+                    Comment nCom = new Comment(current.getId(), current.getCreatedBy(), s);
                     comments.add(nCom);
-                    if(mContext instanceof MainActivity){
-                        ((MainActivity)mContext).addComment(nCom);
+                    if (mContext instanceof MainActivity) {
+                        ((MainActivity) mContext).addComment(nCom);
                     }
                     try {
-                        InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                        InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(layout.getWindowToken(), 0);
                     } catch (Exception e) {
-                        Log.i("keyboard error: ",e.getMessage());
+                        Log.i("keyboard error: ", e.getMessage());
                     }
                     sortEmptyFill(v);
                 }
@@ -111,11 +113,11 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
             @Override
             public void onClick(View v) {
                 v.setEnabled(false);
-                LinearLayout layout=(LinearLayout)v.getParent();
-                for(Comment com:comments){
-                    if(com.getAlertId().equals(current.getId())){
-                        TextView tv=new TextView(v.getContext());
-                        TextView tv2=new TextView(v.getContext());
+                LinearLayout layout = (LinearLayout) v.getParent();
+                for (Comment com : comments) {
+                    if (com.getAlertId().equals(current.getId())) {
+                        TextView tv = new TextView(v.getContext());
+                        TextView tv2 = new TextView(v.getContext());
                         tv.setLayoutParams(new ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.FILL_PARENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -141,14 +143,14 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
                 popup.getMenuInflater().inflate(R.menu.menu_alert_popup, popup.getMenu());
                 Menu popupMenu = popup.getMenu();
                 // if user does not own alert switch off edit and remove buttons
-                Log.i("aid: ",aid);
-                Log.i("userid: ",((MainActivity)mContext).getUserId());
-                if(!aid.equals(((MainActivity)mContext).getUserId())){
+                Log.i("aid: ", aid);
+                Log.i("userid: ", ((MainActivity) mContext).getUserId());
+                if (!aid.equals(((MainActivity) mContext).getUserId())) {
                     popupMenu.findItem(R.id.one).setEnabled(false);
                     popupMenu.findItem(R.id.two).setEnabled(false);
                 }
                 // if user is not garda switch off response button
-                if(getUserLevel(((MainActivity)mContext).getUserId())!=2){
+                if (getUserLevel(((MainActivity) mContext).getUserId()) != 2) {
                     popupMenu.findItem(R.id.three).setEnabled(false);
                 }
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -159,13 +161,13 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
                                 final LinearLayout layout = new LinearLayout(mContext);
                                 layout.setOrientation(LinearLayout.VERTICAL);
                                 alert.setTitle("Edit Alert");
-                                TextView view=new TextView(mContext);
+                                TextView view = new TextView(mContext);
                                 view.setText("Title");
                                 layout.addView(view);
                                 final EditText title = new EditText(mContext);
                                 title.setText(current.getTitle());
                                 layout.addView(title);
-                                TextView view2=new TextView(mContext);
+                                TextView view2 = new TextView(mContext);
                                 view2.setText("Description");
                                 layout.addView(view2);
                                 final EditText body = new EditText(mContext);
@@ -175,10 +177,10 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
                                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         String newTitle = title.getText().toString();
-                                        String newBody=body.getText().toString();
+                                        String newBody = body.getText().toString();
                                         current.setTitle(newTitle);
                                         current.setBody(newBody);
-                                        ((MainActivity)mContext).updateAlert(current);
+                                        ((MainActivity) mContext).updateAlert(current);
                                         InputMethodManager inputManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
                                         inputManager.hideSoftInputFromWindow(layout.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                                     }
@@ -197,12 +199,14 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
                                 adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         current.setActive(false);
-                                        ((MainActivity)mContext).deleteAlert(current);
-                                    } });
+                                        ((MainActivity) mContext).deleteAlert(current);
+                                    }
+                                });
                                 adb.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.dismiss();
-                                    } });
+                                    }
+                                });
                                 adb.show();
 
                                 return true;
@@ -216,7 +220,7 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
                                         String value = input.getText().toString();
                                         // deal with garda response...send string to DB table ??
                                         current.setActive(false);
-                                        ((MainActivity)mContext).deleteAlert(current);
+                                        ((MainActivity) mContext).deleteAlert(current);
                                         InputMethodManager inputManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
                                         inputManager.hideSoftInputFromWindow(input.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                                     }
@@ -256,6 +260,8 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
         }
 
         return rowView;
+
+
     }
 
     // holder of views (better performance holding them in this than inflating every time)
@@ -286,6 +292,11 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
     // set comment list
     public void setCommentList(ArrayList<Comment> list) {
         this.comments = list;
+    }
+
+    //set files list
+    public void setFileList(ArrayList<OutputFile> file){
+        this.files=file;
     }
 
     // get string name from user id
