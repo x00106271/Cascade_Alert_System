@@ -26,6 +26,13 @@ public RecipientAlert(String itemId, String alert, int recipientType, String rec
             this.rId=recipientId;
         }
 
+    public RecipientAlert(String alert, int recipientType, String recipientId)
+    {
+        this.alertId=alert;
+        this.rType=recipientType;
+        this.rId=recipientId;
+    }
+
     public String getId() {
         return Id;
     }

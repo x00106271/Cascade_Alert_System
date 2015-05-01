@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
 
 import com.cascadealertsystem.R;
 import com.microsoft.windowsazure.notifications.NotificationsHandler;
@@ -23,28 +24,29 @@ public class MyHandler extends NotificationsHandler{
     @Override
     public void onReceive(Context context, Bundle bundle) {
         ctx = context;
-        String nhMessage = bundle.getString("message");
-
-        sendNotification(nhMessage);
+        String nhMessage = bundle.getString("msg");
+        //System.out.println("********************** " + nhMessage);
+        sendNotification(nhMessage, context);
     }
 
-    private void sendNotification(String msg) {
+    private void sendNotification(String msg, Context context) {
         mNotificationManager = (NotificationManager)
                 ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0,
                 new Intent(ctx, MainActivity.class), 0);
-
+//Demo
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(ctx)
                         .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle("Notification Hub Demo")
+                        .setContentTitle("Cascade Alert System")
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setContentText(msg);
 
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
     }
 
     @Override

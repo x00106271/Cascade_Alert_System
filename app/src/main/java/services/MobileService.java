@@ -48,7 +48,7 @@ public class MobileService {
     private MobileServiceTable<MediaAsset> mMediaTable;
     private Context mContext;
     private final String TAG = "CAS mobile services. ";
-    private String mUserId;
+    public static String mUserId;
     private String mAreaId=null;
     private List<UserArea> mAreaIds;
     private String mEmail;
@@ -417,4 +417,26 @@ public class MobileService {
         mMediaTable.where().execute(callback);
     }
 
+
+                                /** Other Methods **/
+
+    // add to recipient table
+    public void addToRecipients(RecipientAlert re,TableOperationCallback<RecipientAlert> callback){
+        mRATable.insert(re,callback);
+    }
+
+    // get area id for where to send alert
+    public void getAreaToSendId(String l,TableQueryCallback<Area> callback){
+        mAreaTable.where().field("label").eq(l).execute(callback);
+    }
+
+    //get alert by type
+    public void getAlertByType(int t,TableQueryCallback<Alert> callback){
+        mAlertTable.where().field("alertType").eq(t).execute(callback);
+    }
+
+    // get lat and lng for gps co
+    public void getCordinates(String id,TableQueryCallback<GPS> callback){
+        mGPSTable.where().field("Id").eq(id).execute(callback);
+    }
 }

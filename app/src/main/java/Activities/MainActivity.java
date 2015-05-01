@@ -19,12 +19,14 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.cascadealertsystem.R;
+import com.google.android.gms.games.Notifications;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -36,7 +38,10 @@ import com.microsoft.windowsazure.notifications.NotificationsManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import adaptors.AlertAdaptor;
 import adaptors.HelpAdaptor;
 import models.Alert;
@@ -44,9 +49,11 @@ import models.BaseUser;
 import models.Comment;
 import models.MediaAsset;
 import models.OutputFile;
+import models.UserArea;
 import services.Constants;
 import services.MobileService;
 import services.MobileServiceApp;
+import services.MyHandler;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -55,7 +62,7 @@ public class MainActivity extends ActionBarActivity {
     private MobileService mService;
     private MobileServiceApp mApplication;
     private ListView alertList;
-    private ArrayList<Names> list;
+    public static ArrayList<Names> list;
     private ArrayList<Comment> list2;
     private ProgressBar spinner;
     private ArrayList<Alert> alerts;
@@ -64,11 +71,9 @@ public class MainActivity extends ActionBarActivity {
     private static ArrayList<OutputFile> files;
 
     //notification hub
-    private String SENDER_ID = "Constants.NOTIFICATION_API";
-    private GoogleCloudMessaging gcm;
-    private NotificationHub hub;
-    private String HubName = "cascadehub";
-    private String HubListenConnectionString = "Endpoint=sb://cascadehub-ns.servicebus.windows.net/;SharedAccessKeyName=DefaultListenSharedAccessSignature;SharedAccessKey=9BpUxwsyqwMr8/DjuEtBy1BLpGAsrAWfBLCgxTuxH9M=";
+    private String SENDER_ID = "Constants.SENDER_PID";
+    private Notifications notifications;
+    Set<String> categories = new HashSet<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +113,11 @@ public class MainActivity extends ActionBarActivity {
 
             }
         });
+
+        //notifiactions
+        NotificationsManager.handleNotifications(this, SENDER_ID, MyHandler.class);
+        notifications = new Notifications(this,SENDER_ID);
+        retrievePushIds();
 
         // Load the alerts from the Mobile Service
         loadAlerts();
@@ -409,52 +419,29 @@ public class MainActivity extends ActionBarActivity {
 
 
     //notification hub
-    @SuppressWarnings("unchecked")
-    private void registerWithNotificationHubs() {
-        new AsyncTask() {
+    public void retrievePushIds() {
+        new AsyncTask<Void, Void, Void>(){
             @Override
-            protected Object doInBackground(Object... params) {
+            protected Void doInBackground(Void... params) {
                 try {
-                    String regid = gcm.register(SENDER_ID);
-                    DialogNotify("Registered Successfully","RegId : " +
-                            hub.register(regid).getRegistrationId());
-                } catch (Exception e) {
-                    DialogNotify("Exception",e.getMessage());
-                    return e;
+                    MobileServiceTable<UserArea> mUserAreaTable;
+                    List<UserArea> userAreas;
+
+                    mUserAreaTable=MobileService.mClient.getTable(UserArea.class);
+                    userAreas = mUserAreaTable.where().field("UserId").
+                            eq(MobileService.mUserId).execute().get();
+                    categories.add(MobileService.mUserId);
+                    for (int i = 0; i < userAreas.size(); i++)
+                    {
+                        categories.add(userAreas.get(i).areaId);
+                        System.out.println(i + " " + userAreas.get(i).areaId);
+                    }
+                    //notifications.storeCategoriesAndSubscribe(categories);
+                } catch (Exception e){
+                    //createAndShowDialog(e, "Error");
                 }
                 return null;
             }
-        }.execute(null, null, null);
-    }
-
-    /**
-     * A modal AlertDialog for displaying a message on the UI thread
-     * when theres an exception or message to report.
-     *
-     * @param title   Title for the AlertDialog box.
-     * @param message The message displayed for the AlertDialog box.
-     */
-    public void DialogNotify(final String title,final String message)
-    {
-        final AlertDialog.Builder dlg;
-        dlg = new AlertDialog.Builder(this);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AlertDialog dlgAlert = dlg.create();
-                dlgAlert.setTitle(title);
-                dlgAlert.setButton(DialogInterface.BUTTON_POSITIVE,
-                        (CharSequence) "OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                dlgAlert.setMessage(message);
-                dlgAlert.setCancelable(false);
-                dlgAlert.show();
-            }
-        });
+        }.execute();
     }
 }

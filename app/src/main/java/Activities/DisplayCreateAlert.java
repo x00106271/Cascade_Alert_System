@@ -47,7 +47,6 @@ import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -59,6 +58,7 @@ import models.Alert;
 import models.Area;
 import models.GPS;
 import models.MediaAsset;
+import models.RecipientAlert;
 import services.Constants;
 import services.FetchCordinatesIntentService;
 import services.MobileService;
@@ -90,6 +90,8 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
     private String gpsId;
     private File media;
     private String pickedType;
+    private String alertid;
+    private String areaid;
 
 
     @Override
@@ -120,6 +122,7 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
         mGoogleApiClient.connect();
 
         addressFound=false;
+        pickedType=null;
 
         //fill spinner 1
         String[] list = {"Crime", "Fire", "Missing", "Stolen", "Road", "Service", "Weather", "Event"};
@@ -273,30 +276,81 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
                             Toast.LENGTH_LONG).show();
                     post.setEnabled(true);
                 } else {
-                    MediaAsset ma=new MediaAsset(null,entity.getId(),pickedType);
-                    mService.insertMedia(ma,new TableOperationCallback<MediaAsset>() {
-                        @Override
-                        public void onCompleted(MediaAsset entity, Exception exception,
-                                                ServiceFilterResponse response) {
+                    alertid=entity.getId();
+                    if(pickedType!=null){ // image or video picked with alert
+                        MediaAsset ma=new MediaAsset(null,entity.getId(),pickedType);
+                        mService.insertMedia(ma,new TableOperationCallback<MediaAsset>() {
+                            @Override
+                            public void onCompleted(MediaAsset entity, Exception exception,
+                                                    ServiceFilterResponse response) {
 
-                            if (exception != null) {
-                                Log.e(TAG, exception.getMessage());
-                                Toast.makeText(DisplayCreateAlert.this, "error...try again!!",
-                                        Toast.LENGTH_LONG).show();
-                                post.setEnabled(true);
-                            } else {
-                                String a=entity.getId()+pickedType;
-                                mService.uploadFile(a,media);
-                                entity.setData(entity.getId());
-                                mService.updateMedia(entity);
-                                Toast.makeText(DisplayCreateAlert.this, "alert created",
-                                        Toast.LENGTH_LONG).show();
-                                mGoogleApiClient.disconnect();
-                                finish();
+                                if (exception != null) {
+                                    Log.e(TAG, exception.getMessage());
+                                    Toast.makeText(DisplayCreateAlert.this, "error...try again!!",
+                                            Toast.LENGTH_LONG).show();
+                                    post.setEnabled(true);
+                                } else {
+                                    String a=entity.getId()+pickedType;
+                                    mService.uploadFile(a,media);
+                                    entity.setData(entity.getId());
+                                    mService.updateMedia(entity);
+                                    mService.getAreaToSendId(location, new TableQueryCallback<Area>() {
+                                        @Override
+                                        public void onCompleted(List<Area> result, int count, Exception exception, ServiceFilterResponse response) {
+                                            if(exception==null){
+                                                areaid=result.get(0).getId();
+                                                RecipientAlert re=new RecipientAlert(alertid,1,areaid);
+                                                mService.addToRecipients(re,new TableOperationCallback<RecipientAlert>() {
+                                                    @Override
+                                                    public void onCompleted(RecipientAlert rentity, Exception exception,
+                                                                            ServiceFilterResponse response) {
+                                                        if(exception!=null){
+                                                            Toast.makeText(DisplayCreateAlert.this, "error...try again",
+                                                                    Toast.LENGTH_LONG).show();
+                                                            post.setEnabled(true);
+                                                        }
+                                                        else{
+                                                            Toast.makeText(DisplayCreateAlert.this, "alert created",
+                                                                    Toast.LENGTH_LONG).show();
+                                                            mGoogleApiClient.disconnect();
+                                                            finish();
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                            else{
+                                                Toast.makeText(DisplayCreateAlert.this, "error...try again",
+                                                        Toast.LENGTH_LONG).show();
+                                                post.setEnabled(true);
+                                            }
+                                        }
+                                    });
+                                }
+
                             }
+                        });
+                    }
+                    else{ // not picked
+                        RecipientAlert re=new RecipientAlert(alertid,1,areaid);
+                        mService.addToRecipients(re,new TableOperationCallback<RecipientAlert>() {
+                            @Override
+                            public void onCompleted(RecipientAlert rentity, Exception exception,
+                                                    ServiceFilterResponse response) {
+                                if(exception!=null){
+                                    Toast.makeText(DisplayCreateAlert.this, "error...try again",
+                                            Toast.LENGTH_LONG).show();
+                                    post.setEnabled(true);
+                                }
+                                else{
+                                    Toast.makeText(DisplayCreateAlert.this, "alert created",
+                                            Toast.LENGTH_LONG).show();
+                                    mGoogleApiClient.disconnect();
+                                    finish();
+                                }
+                            }
+                        });
 
-                        }
-                    });
+                    }
                 }
 
             }
