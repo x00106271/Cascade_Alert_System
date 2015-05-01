@@ -505,8 +505,6 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        // This callback is important for handling errors that
-        // may occur while attempting to connect with Google.
         Toast.makeText(DisplayCreateAlert.this, "error google connection failed", Toast.LENGTH_LONG).show();
     }
 

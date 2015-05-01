@@ -258,9 +258,7 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
         } else {
             holder.image.setImageResource(R.drawable.event);
         }
-            //HAVE THE ALERT AND MEDIA CHECK HERE...IF MEDIA FOUND PUT IN A IMAGE/VIDEO VIEW
-        // AND RUN THE BACKGROUND THREAD (SPINNER RUNNING WHILE IT LOADS) AND HAVE IT LOAD IMAGE/VIDEO
-        // WHEN IT RETURNS
+
         return rowView;
 
 

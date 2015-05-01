@@ -19,7 +19,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.cascadealertsystem.R;
-import com.google.android.gms.games.Notifications;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -28,11 +27,6 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.os.AsyncTask;
-import com.google.android.gms.gcm.*;
-import com.microsoft.windowsazure.messaging.*;
 import com.microsoft.windowsazure.notifications.NotificationsManager;
 
 import java.io.File;
@@ -72,7 +66,7 @@ public class MainActivity extends ActionBarActivity {
 
     //notification hub
     private String SENDER_ID = "Constants.SENDER_PID";
-    private Notifications notifications;
+    private Notifications2 notifications;
     Set<String> categories = new HashSet<String>();
 
     @Override
@@ -116,7 +110,7 @@ public class MainActivity extends ActionBarActivity {
 
         //notifiactions
         NotificationsManager.handleNotifications(this, SENDER_ID, MyHandler.class);
-        notifications = new Notifications(this,SENDER_ID);
+        notifications = new Notifications2(this,SENDER_ID);
         retrievePushIds();
 
         // Load the alerts from the Mobile Service
@@ -407,8 +401,8 @@ public class MainActivity extends ActionBarActivity {
         mAdaptor.clear();
         spinner.setVisibility(View.GONE);
         mAdaptor.setFileList(files);
-        Log.i("NOW","NOW");       // this (NOW NOW) is showing up in the logs, then all the alerts are being loaded in adapter,
-        for(OutputFile f:files){  // and then the files come back from download. its the same with both async task and thread
+        Log.i("NOW","NOW");
+        for(OutputFile f:files){
             Log.i("file id: ",f.getId());
             Log.i("file path: ",f.getPath());
         }
@@ -436,9 +430,9 @@ public class MainActivity extends ActionBarActivity {
                         categories.add(userAreas.get(i).areaId);
                         System.out.println(i + " " + userAreas.get(i).areaId);
                     }
-                    //notifications.storeCategoriesAndSubscribe(categories);
+                    notifications.storeCategoriesAndSubscribe(categories);
                 } catch (Exception e){
-                    //createAndShowDialog(e, "Error");
+                    Log.i("push error: ",e.getMessage());
                 }
                 return null;
             }

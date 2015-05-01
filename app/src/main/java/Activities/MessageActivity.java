@@ -1,28 +1,21 @@
 package activities;
-
-
-import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsoluteLayout;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.Spinner;
 
 import com.cascadealertsystem.R;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import models.BaseUser;
 import services.MobileService;
 import services.MobileServiceApp;
 
@@ -57,7 +50,7 @@ public class MessageActivity extends ActionBarActivity {
         btn.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-
+                post();
             }
         });
 
@@ -78,6 +71,20 @@ public class MessageActivity extends ActionBarActivity {
 
     //create a drop down dialog
     public void createDropDown(){
+        mService.loadAlerts(new TableQueryCallback<BaseUser>() {
+
+            @Override
+            public void onCompleted(List<BaseUser> results, int count,
+            Exception exception, ServiceFilterResponse response) {
+                if (exception == null) {
+
+                }
+            }
+        });
+    }
+
+    //post message
+    public void post(){
 
     }
 }
