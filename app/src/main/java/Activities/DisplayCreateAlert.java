@@ -290,16 +290,17 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
                                             Toast.LENGTH_LONG).show();
                                     post.setEnabled(true);
                                 } else {
-                                    String a=entity.getId()+pickedType;
-                                    mService.uploadFile(a,media);
-                                    entity.setData(entity.getId());
-                                    mService.updateMedia(entity);
+                                    String data=entity.getId()+pickedType;
+                                    mService.uploadFile(data,media);
+                                    MediaAsset meas=entity;
+                                    meas.setData(data);
+                                    mService.updateMedia(meas);
                                     mService.getAreaToSendId(location, new TableQueryCallback<Area>() {
                                         @Override
                                         public void onCompleted(List<Area> result, int count, Exception exception, ServiceFilterResponse response) {
                                             if(exception==null){
                                                 areaid=result.get(0).getId();
-                                                RecipientAlert re=new RecipientAlert(alertid,1,areaid);
+                                                RecipientAlert re=new RecipientAlert(alertid,2,areaid);
                                                 mService.addToRecipients(re,new TableOperationCallback<RecipientAlert>() {
                                                     @Override
                                                     public void onCompleted(RecipientAlert rentity, Exception exception,
@@ -330,22 +331,35 @@ public class DisplayCreateAlert extends ActionBarActivity implements AdapterView
                             }
                         });
                     }
-                    else{ // not picked
-                        RecipientAlert re=new RecipientAlert(alertid,1,areaid);
-                        mService.addToRecipients(re,new TableOperationCallback<RecipientAlert>() {
+                    else{ // image video not picked
+                        mService.getAreaToSendId(location, new TableQueryCallback<Area>() {
                             @Override
-                            public void onCompleted(RecipientAlert rentity, Exception exception,
-                                                    ServiceFilterResponse response) {
-                                if(exception!=null){
+                            public void onCompleted(List<Area> result, int count, Exception exception, ServiceFilterResponse response) {
+                                if(exception==null){
+                                    areaid=result.get(0).getId();
+                                    RecipientAlert re=new RecipientAlert(alertid,2,areaid);
+                                    mService.addToRecipients(re,new TableOperationCallback<RecipientAlert>() {
+                                        @Override
+                                        public void onCompleted(RecipientAlert rentity, Exception exception,
+                                                                ServiceFilterResponse response) {
+                                            if(exception!=null){
+                                                Toast.makeText(DisplayCreateAlert.this, "error...try again",
+                                                        Toast.LENGTH_LONG).show();
+                                                post.setEnabled(true);
+                                            }
+                                            else{
+                                                Toast.makeText(DisplayCreateAlert.this, "alert created",
+                                                        Toast.LENGTH_LONG).show();
+                                                mGoogleApiClient.disconnect();
+                                                finish();
+                                            }
+                                        }
+                                    });
+                                }
+                                else{
                                     Toast.makeText(DisplayCreateAlert.this, "error...try again",
                                             Toast.LENGTH_LONG).show();
                                     post.setEnabled(true);
-                                }
-                                else{
-                                    Toast.makeText(DisplayCreateAlert.this, "alert created",
-                                            Toast.LENGTH_LONG).show();
-                                    mGoogleApiClient.disconnect();
-                                    finish();
                                 }
                             }
                         });

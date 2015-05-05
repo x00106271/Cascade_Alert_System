@@ -3,7 +3,6 @@ package adaptors;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +43,7 @@ public class HelpAdaptor extends ArrayAdapter<HelpAdaptor.Item>{
 
     // add image icons
     public Integer getImage(int pos) {
-        Integer[] imageIds = new Integer[12];
+        Integer[] imageIds = new Integer[13];
         imageIds[0] = R.drawable.alert;
         imageIds[1] = R.drawable.message;
         imageIds[2] = R.drawable.map;
@@ -57,6 +56,7 @@ public class HelpAdaptor extends ArrayAdapter<HelpAdaptor.Item>{
         imageIds[9]=R.drawable.service;
         imageIds[10]=R.drawable.weather;
         imageIds[11]=R.drawable.event;
+        imageIds[12]=R.drawable.message;
         return (imageIds[pos]);
     }
 

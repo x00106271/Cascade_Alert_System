@@ -7,7 +7,6 @@ import android.app.Application;
 public class MobileServiceApp extends Application {
     private MobileService mService;
     private Activity mCurrentActivity;
-    private boolean mIsApplicationActive = false;
 
     public MobileServiceApp() {
 
@@ -23,17 +22,5 @@ public class MobileServiceApp extends Application {
     public void setCurrentActivity(Activity activity) {
         mCurrentActivity = activity;
     }
-
-    public Activity getCurrentActivity() {
-        return mCurrentActivity;
-    }
-
-    public void setIsApplicationActive(boolean isApplicationActive) {
-        mIsApplicationActive = isApplicationActive;
-    }
-
-    public boolean getIsApplicationActive() { return mIsApplicationActive; }
-
-
 
 }

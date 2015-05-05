@@ -11,7 +11,7 @@ public class RecipientAlert{
     private String rId;
 
     // RecipientType user = 0, group = 1, area = 2, all = 3
-    // recipientId = null then broadcast
+    // recipientId = null when broadcast
 
 public RecipientAlert()
         {

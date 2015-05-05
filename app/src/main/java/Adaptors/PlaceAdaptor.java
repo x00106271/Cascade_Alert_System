@@ -24,7 +24,7 @@ import services.Constants;
 public class PlaceAdaptor extends ArrayAdapter<String> implements Filterable{
 
     private ArrayList<String> resultList;
-    private static final String TAG = "Place Address";
+    private static final String TAG = "Place Address adaptor: ";
     private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
     private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
     private static final String OUT_JSON = "/json";
@@ -53,7 +53,7 @@ public class PlaceAdaptor extends ArrayAdapter<String> implements Filterable{
                     resultList = autocomplete(constraint.toString());
                 }
                 else{
-                    resultList = new ArrayList<String>();
+                    resultList = new ArrayList<>();
                 }
                 filterResults.values = resultList;
                 filterResults.count = resultList.size();
@@ -95,10 +95,10 @@ private ArrayList<String> autocomplete(String input) {
             jsonResults.append(buff, 0, read);
         }
     } catch (MalformedURLException e) {
-        Log.e(TAG, "Error processing Places API URL", e);
+        Log.i(TAG, "Error processing Places API URL", e);
         return resultList;
     } catch (IOException e) {
-        Log.e(TAG, "Error connecting to Places API", e);
+        Log.i(TAG, "Error connecting to Places API", e);
         return resultList;
     } finally {
         if (conn != null) {
@@ -112,12 +112,12 @@ private ArrayList<String> autocomplete(String input) {
         JSONArray predsJsonArray = jsonObj.getJSONArray("predictions");
 
         // Extract the Place descriptions from the results
-        resultList = new ArrayList<String>(predsJsonArray.length());
+        resultList = new ArrayList<>(predsJsonArray.length());
         for (int i = 0; i < predsJsonArray.length(); i++) {
             resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
         }
     } catch (JSONException e) {
-        Log.e(TAG, "Cannot process JSON results", e);
+        Log.i(TAG, "Cannot process JSON results", e);
     }
 
     return resultList;

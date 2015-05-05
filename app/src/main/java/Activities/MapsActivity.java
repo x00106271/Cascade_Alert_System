@@ -1,8 +1,8 @@
 package activities;
 
-import android.app.ActionBar;
-import android.support.v4.app.FragmentActivity;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +28,7 @@ import models.GPS;
 import services.MobileService;
 import services.MobileServiceApp;
 
-public class MapsActivity extends FragmentActivity {
+public class MapsActivity extends ActionBarActivity {
 
     private GoogleMap map;
     private Spinner spin1;
@@ -52,9 +52,9 @@ public class MapsActivity extends FragmentActivity {
         LatLng irl = new LatLng(53.344103999999990000,  -6.267493699999932000);
         map.setMyLocationEnabled(true);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(irl, 5));
-        map.clear();
         map.getUiSettings().setZoomGesturesEnabled(true);
         map.getUiSettings().setScrollGesturesEnabled(true);
+        map.clear();
 
         //spinner
         spin1 = (Spinner) findViewById(R.id.spinner1);
@@ -131,6 +131,9 @@ public class MapsActivity extends FragmentActivity {
             Exception exception, ServiceFilterResponse response) {
                 if (exception == null) {
                     String gps;
+                    Location loc = map.getMyLocation();
+                    LatLng irl2 = new LatLng(loc.getLatitude(),loc.getLongitude());
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(irl2, 9));
                     for(Alert a:results){
                         gps=a.getGpsId();
                         mService.getCordinates(gps, new TableQueryCallback<GPS>() {

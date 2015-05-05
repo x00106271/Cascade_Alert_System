@@ -22,7 +22,7 @@
         android:name="services.MobileServiceApp"
         android:allowBackup="true"
         android:icon="@drawable/mainicon"
-
+        android:largeHeap="true"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity

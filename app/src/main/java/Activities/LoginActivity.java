@@ -64,6 +64,7 @@ public class LoginActivity extends Activity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    loginButton.setEnabled(false);
                     login();
                     handled = true;
                 }

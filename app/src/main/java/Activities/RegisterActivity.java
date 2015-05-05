@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.v7.app.ActionBarActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -110,6 +111,7 @@ public class RegisterActivity extends ActionBarActivity implements AdapterView.O
                 Intent loginScreen = new Intent(getApplicationContext(), LoginActivity.class);
                 mGoogleApiClient.disconnect();
                 startActivity(loginScreen);
+                finish();
             }
         });
 
@@ -209,9 +211,10 @@ public class RegisterActivity extends ActionBarActivity implements AdapterView.O
                     submitButton.setEnabled(true);
                 }
                 else{
-                    Intent mainScreen = new Intent(RegisterActivity.this, Pre_verify.class);
+                    Intent verScreen = new Intent(RegisterActivity.this, Pre_verify.class);
                     mGoogleApiClient.disconnect();
-                    startActivity(mainScreen);
+                    startActivity(verScreen);
+                    finish();
                 }
 
             }
@@ -272,12 +275,11 @@ public class RegisterActivity extends ActionBarActivity implements AdapterView.O
     }
 
     // validate email address
-    public boolean validateEmail(String email){
-        if(email.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$;")){
-            return true;
-        }
-        else{
+    public boolean validateEmail(String target) {
+        if (TextUtils.isEmpty(target)) {
             return false;
+        } else {
+            return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
         }
     }
 
@@ -441,7 +443,7 @@ public class RegisterActivity extends ActionBarActivity implements AdapterView.O
 
     // change phone number to international
     public String valNumber(String num){
-        String num2=num.substring(0,9);
+        String num2=num.substring(1,10);
         num2="+353"+num2;
         return num2;
     }

@@ -108,7 +108,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        //notifiactions
+        //notifications
         NotificationsManager.handleNotifications(this, SENDER_ID, MyHandler.class);
         notifications = new Notifications2(this,SENDER_ID);
         retrievePushIds();
@@ -135,7 +135,8 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(alertIntent);
                 return true;
             case R.id.action_messages:
-
+                Intent mIntent=new Intent(MainActivity.this,MessageActivity.class);
+                startActivity(mIntent);
                 return true;
             case R.id.action_map:
                 Intent mapIntent=new Intent(MainActivity.this,MapsActivity.class);
@@ -329,19 +330,20 @@ public class MainActivity extends ActionBarActivity {
 
     // add text to image for help dropdown
     public String getTextHelp(int pos) {
-        String[] imageIds = new String[12];
-        imageIds[0] = "Open alert creation screen";
-        imageIds[1] = "Open private message screen";
-        imageIds[2] = "Open Google maps screen";
+        String[] imageIds = new String[13];
+        imageIds[0] = "Opens alert creation screen";
+        imageIds[1] = "Opens a private message screen";
+        imageIds[2] = "Opens a map screen to view alert locations";
         imageIds[3] = "Refresh the alerts";
-        imageIds[4] = "Represents a crime";
-        imageIds[5]="Represents a fire";
-        imageIds[6]="Represents something/someone missing";
-        imageIds[7]="Represents something stolen";
-        imageIds[8]="Represents a road related issue";
-        imageIds[9]="Represents a service outage";
-        imageIds[10]="Represents a weather warning";
-        imageIds[11]="Represents an event";
+        imageIds[4] = "Represents an alert of a crime";
+        imageIds[5]="Represents an alert of a fire";
+        imageIds[6]="Represents an alert of something/someone missing";
+        imageIds[7]="Represents an alert of something stolen";
+        imageIds[8]="Represents an alert of a road related issue";
+        imageIds[9]="Represents an alert of a service outage";
+        imageIds[10]="Represents an alert of a weather warning";
+        imageIds[11]="Represents an alert of a event";
+        imageIds[12]="Represents an alert of a private message";
         return (imageIds[pos]);
     }
 

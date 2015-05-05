@@ -255,8 +255,11 @@ public class AlertAdaptor extends ArrayAdapter<Alert> {
             holder.image.setImageResource(R.drawable.service);
         } else if (current.getAlertType() == 6) {
             holder.image.setImageResource(R.drawable.weather);
-        } else {
+        }else if(current.getAlertType()==7){
             holder.image.setImageResource(R.drawable.event);
+        }
+        else {
+            holder.image.setImageResource(R.drawable.message);
         }
 
         return rowView;

@@ -9,7 +9,7 @@ public final class Constants {
 
     public static String MOBILE_SERVICE_URL = "https://cascade.azure-mobile.net/";
     public static String MOBILE_SERVICE_APPLICATION_KEY = "TVkGQDWdaeNNbNKirTHAknOUmHqWgu76";
-    public static String GOOGLE_PLACES_API="AIzaSyCBqHiEcTimiosMI5MR4F_iepoQ1168sBg";
+    public static String GOOGLE_PLACES_API="AIzaSyABFU8JMZ-1RONz9L_J7QGRuFDem7MZ63A";
     public static String SENDER_PID="395945727516";
 
     //for geocoder
